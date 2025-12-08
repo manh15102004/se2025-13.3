@@ -1,0 +1,345 @@
+import React, { useState } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, TouchableOpacity, StatusBar, ScrollView, TextInput, Image } from 'react-native';
+import Icon from 'react-native-vector-icons/Feather';
+import IconAnt from 'react-native-vector-icons/AntDesign';
+
+interface Props {
+  navigation: any;
+  route: any;
+}
+
+const ProductDetailScreen: React.FC<Props> = ({ navigation, route }) => {
+  const { product } = route.params;
+  const [liked, setLiked] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+
+  if (!product) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>Product not found</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar backgroundColor={'#ffffff'} barStyle={'dark-content'} />
+
+      {/* Header with back button */}
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
+          <Icon name="arrow-left" size={24} color="#1a1a2e" />
+        </TouchableOpacity>
+        <Text style={styles.headerTitle}>Chi tiết sản phẩm</Text>
+        <View style={{ width: 24 }} />
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Product Image */}
+        <View style={styles.imageContainer}>
+          <Text style={styles.productEmoji}>{product.image}</Text>
+        </View>
+
+        {/* Product Info */}
+        <View style={styles.infoSection}>
+          <View style={styles.productHeader}>
+            <View>
+              <Text style={styles.productName}>{product.name}</Text>
+              <View style={styles.ratingRow}>
+                <IconAnt name="star" size={16} color="#ffa500" />
+                <Text style={styles.rating}>4.8 (240 đánh giá)</Text>
+              </View>
+            </View>
+            <TouchableOpacity onPress={() => setLiked(!liked)}>
+              <IconAnt name={liked ? "heart" : "hearto"} size={24} color={liked ? "#ef4444" : "#1a1a2e"} />
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.price}>{product.price}</Text>
+          <Text style={styles.description}>
+            Sản phẩm tươi mới, chất lượng cao, được chọn lọc kỹ từ những vùng trồng tốt nhất. Giàu vitamin và chất dinh dưỡng tốt cho sức khỏe.
+          </Text>
+        </View>
+
+        {/* Q&A Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Q&A (Câu hỏi)</Text>
+          </View>
+          <View style={styles.qaCard}>
+            <Text style={styles.qaQuestion}>Q: Sản phẩm này có nguyên chất 100% không?</Text>
+            <Text style={styles.qaAnswer}>A: Có, sản phẩm 100% nguyên chất không có chất bảo quản.</Text>
+          </View>
+          <View style={styles.qaCard}>
+            <Text style={styles.qaQuestion}>Q: Thời gian bảo quản bao lâu?</Text>
+            <Text style={styles.qaAnswer}>A: Khi nhận được hàng nên sử dụng trong 3-5 ngày.</Text>
+          </View>
+        </View>
+
+        {/* Reviews Section */}
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Đánh giá (Reviews)</Text>
+            <TouchableOpacity>
+              <Text style={styles.seeAll}>Xem tất cả</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.reviewCard}>
+            <View style={styles.reviewerInfo}>
+              <View style={styles.avatar} />
+              <View>
+                <Text style={styles.reviewerName}>Nguyễn Văn A</Text>
+                <View style={styles.reviewRating}>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <IconAnt key={i} name="star" size={12} color={i <= 4 ? "#ffa500" : "#ddd"} />
+                  ))}
+                </View>
+              </View>
+            </View>
+            <Text style={styles.reviewText}>Sản phẩm rất tốt, tươi mới, giao hàng nhanh. Sẽ mua lại!</Text>
+          </View>
+        </View>
+
+        {/* Quantity Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Số lượng</Text>
+          <View style={styles.quantityControl}>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => quantity > 1 && setQuantity(quantity - 1)}
+            >
+              <Text style={styles.quantityButtonText}>−</Text>
+            </TouchableOpacity>
+            <Text style={styles.quantityText}>{quantity}</Text>
+            <TouchableOpacity
+              style={styles.quantityButton}
+              onPress={() => setQuantity(quantity + 1)}
+            >
+              <Text style={styles.quantityButtonText}>+</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+
+        {/* Add to Cart & Chat Button */}
+        <View style={styles.actionSection}>
+          <TouchableOpacity style={styles.chatButton}>
+            <Icon name="message-circle" size={20} color="#1a1a2e" />
+            <Text style={styles.chatButtonText}>Chat nhanh</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.addToCartButton}>
+            <Icon name="shopping-cart" size={20} color="white" />
+            <Text style={styles.addToCartButtonText}>Thêm vào giỏ</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#ffffff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#f0f0f0',
+  },
+  headerTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a2e',
+  },
+  imageContainer: {
+    width: '100%',
+    height: 250,
+    backgroundColor: '#f5f5f5',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productEmoji: {
+    fontSize: 120,
+  },
+  infoSection: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  productHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  productName: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+    marginBottom: 4,
+  },
+  ratingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  rating: {
+    fontSize: 12,
+    color: '#666',
+    marginLeft: 6,
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#ef4444',
+    marginBottom: 12,
+  },
+  description: {
+    fontSize: 13,
+    color: '#666',
+    lineHeight: 20,
+  },
+  section: {
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  sectionTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#1a1a2e',
+  },
+  seeAll: {
+    fontSize: 12,
+    color: '#ef4444',
+  },
+  qaCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+  },
+  qaQuestion: {
+    fontSize: 13,
+    fontWeight: '500',
+    color: '#1a1a2e',
+    marginBottom: 6,
+  },
+  qaAnswer: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
+  },
+  reviewCard: {
+    backgroundColor: '#f9f9f9',
+    borderRadius: 8,
+    padding: 12,
+  },
+  reviewerInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  avatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#ddd',
+    marginRight: 8,
+  },
+  reviewerName: {
+    fontSize: 13,
+    fontWeight: '600',
+    color: '#1a1a2e',
+  },
+  reviewRating: {
+    flexDirection: 'row',
+    marginTop: 2,
+  },
+  reviewText: {
+    fontSize: 12,
+    color: '#666',
+    lineHeight: 18,
+  },
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    borderRadius: 8,
+    overflow: 'hidden',
+    alignSelf: 'flex-start',
+    marginTop: 8,
+  },
+  quantityButton: {
+    width: 36,
+    height: 36,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#f5f5f5',
+  },
+  quantityButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1a1a2e',
+  },
+  quantityText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a2e',
+    minWidth: 40,
+    textAlign: 'center',
+  },
+  actionSection: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    borderTopWidth: 1,
+    borderTopColor: '#f0f0f0',
+  },
+  chatButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#1a1a2e',
+    borderRadius: 8,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  chatButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#1a1a2e',
+  },
+  addToCartButton: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ef4444',
+    borderRadius: 8,
+    paddingVertical: 12,
+    gap: 6,
+  },
+  addToCartButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: 'white',
+  },
+});
+
+export default ProductDetailScreen;
