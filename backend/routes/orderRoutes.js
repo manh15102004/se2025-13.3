@@ -9,17 +9,17 @@ const {
   getNotifications,
   markNotificationAsRead,
 } = require('../controllers/orderController');
-const { auth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // All routes require authentication
-router.post('/create', auth, createOrder);
-router.get('/my-purchases', auth, getMyOrders);
-router.get('/my-sales', auth, getMySalesOrders);
-router.put('/:orderId/approve', auth, approveOrder);
-router.put('/:orderId/cancel', auth, cancelOrder);
+router.post('/create', protect, createOrder);
+router.get('/my-purchases', protect, getMyOrders);
+router.get('/my-sales', protect, getMySalesOrders);
+router.put('/:orderId/approve', protect, approveOrder);
+router.put('/:orderId/cancel', protect, cancelOrder);
 
 // Notifications
-router.get('/notifications', auth, getNotifications);
-router.put('/notifications/:notificationId/read', auth, markNotificationAsRead);
+router.get('/notifications', protect, getNotifications);
+router.put('/notifications/:notificationId/read', protect, markNotificationAsRead);
 
 module.exports = router;

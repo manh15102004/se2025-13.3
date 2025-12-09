@@ -11,6 +11,7 @@ const OrderItem = require('./OrderItem');
 const Cart = require('./Cart');
 const Review = require('./Review');
 const Notification = require('./Notification');
+const Shipment = require('./Shipment');
 
 // Define associations
 User.hasMany(Message, { foreignKey: 'senderId' });
@@ -58,6 +59,13 @@ Notification.belongsTo(User, { foreignKey: 'userId' });
 Order.hasMany(Notification, { foreignKey: 'orderId' });
 Notification.belongsTo(Order, { foreignKey: 'orderId' });
 
+// Shipment associations
+User.hasMany(Shipment, { foreignKey: 'shipperId', as: 'shipments' });
+Shipment.belongsTo(User, { foreignKey: 'shipperId', as: 'shipper' });
+
+Order.hasOne(Shipment, { foreignKey: 'orderId' });
+Shipment.belongsTo(Order, { foreignKey: 'orderId' });
+
 module.exports = {
   sequelize,
   User,
@@ -67,7 +75,7 @@ module.exports = {
   Order,
   OrderItem,
   Cart,
-  Cart,
   Review,
   Notification,
+  Shipment,
 };

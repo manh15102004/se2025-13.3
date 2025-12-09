@@ -1,76 +1,188 @@
 import React, { useState, useEffect } from "react";
-import { SafeAreaView, StatusBar, StyleSheet, Text, TextInput, View, TouchableOpacity, Alert} from "react-native";
+import { SafeAreaView, StatusBar, StyleSheet, Text, TextInput, View, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
 import Icon from 'react-native-vector-icons/Fontisto';
 import { LoginManager, AccessToken } from 'react-native-fbsdk-next';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import useUserStore from "../../store/userStore";
+import { authAPI } from "../../api/client";
 
-
-const LoginScreen = ({ navigation }: any)=>{
+const LoginScreen = ({ navigation }: any) => {
     const [isRemember, setIsRemember] = useState(false);
-    const [email, setEmail] = useState('demo@example.com');
-    const [password, setPassword] = useState('123456');
-    
-    
-    const handleLogin = () => {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+    const [isRegister, setIsRegister] = useState(false);
+    const [fullName, setFullName] = useState('');
+    const [phone, setPhone] = useState('');
+    const { login } = useUserStore();
+
+    const handleLogin = async () => {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        
+
         if (!email) {
-            Alert.alert('Error', 'Email không được để trống');
+            Alert.alert('Lỗi', 'Email không được để trống');
             return;
         }
-        
+
         if (!emailRegex.test(email)) {
-            Alert.alert('Error', 'Email không hợp lệ');
+            Alert.alert('Lỗi', 'Email không hợp lệ');
             return;
         }
-        
+
         if (!password) {
-            Alert.alert('Error', 'Password không được để trống');
+            Alert.alert('Lỗi', 'Password không được để trống');
             return;
         }
-        
+
         if (password.length < 6) {
-            Alert.alert('Error', 'Password phải có ít nhất 6 ký tự');
+            Alert.alert('Lỗi', 'Password phải có ít nhất 6 ký tự');
             return;
         }
-        
-        const formData = {
-            email: email,
-            password: password,
-            checkbox: isRemember
-        };
-        Alert.alert('Login Success', JSON.stringify(formData, null, 2));
-        navigation.navigate('Home');
+
+        setIsLoading(true);
+        try {
+            const response = await authAPI.login(email, password);
+
+            if (response.success && response.token) {
+                // Save token
+                await AsyncStorage.setItem('authToken', response.token);
+                await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+                // Update user store
+                login({
+                    name: response.user.fullName,
+                    email: response.user.email,
+                });
+
+                Alert.alert('Thành công', 'Đăng nhập thành công');
+
+                // Redirect based on role
+                if (response.user.role === 'shipper') {
+                    navigation.navigate('ShipperDashboard');
+                } else {
+                    navigation.navigate('Home');
+                }
+            } else {
+                Alert.alert('Lỗi', response.message || 'Đăng nhập thất bại');
+            }
+        } catch (error: any) {
+            Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
-    
-    return(
-  <SafeAreaView style = {styles.container}>
-        <StatusBar backgroundColor={'#f5f5f5ff'} barStyle={"dark-content"}></StatusBar>
+    const handleRegister = async () => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !password || !fullName) {
+            Alert.alert('Lỗi', 'Vui lòng điền đầy đủ thông tin');
+            return;
+        }
+
+        if (!emailRegex.test(email)) {
+            Alert.alert('Lỗi', 'Email không hợp lệ');
+            return;
+        }
+
+        if (password.length < 6) {
+            Alert.alert('Lỗi', 'Password phải có ít nhất 6 ký tự');
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            const response = await authAPI.register(email, password, fullName, phone);
+
+            if (response.success && response.token) {
+                // Save token
+                await AsyncStorage.setItem('authToken', response.token);
+                await AsyncStorage.setItem('user', JSON.stringify(response.user));
+
+                // Update user store
+                login({
+                    name: response.user.fullName,
+                    email: response.user.email,
+                });
+
+                Alert.alert('Thành công', 'Đăng ký thành công');
+
+                // Redirect based on role
+                if (response.user.role === 'shipper') {
+                    navigation.navigate('ShipperDashboard');
+                } else {
+                    navigation.navigate('Home');
+                }
+            } else {
+                Alert.alert('Lỗi', response.message || 'Đăng ký thất bại');
+            }
+        } catch (error: any) {
+            Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra');
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handleSubmit = isRegister ? handleRegister : handleLogin;
+
+    return (
+        <SafeAreaView style={styles.container}>
+            <StatusBar backgroundColor={'#f5f5f5ff'} barStyle={"dark-content"}></StatusBar>
 
             <View style={styles.header}>
-                <Text style={styles.welcomeTitle}>Login</Text>
-            
+                <Text style={styles.welcomeTitle}>{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</Text>
+
             </View>
 
-       
-            <View style ={styles.form}>
+
+            {isRegister && (
+                <>
+                    <View style={styles.form}>
+                        <Icon name="user" size={24} color="gray" />
+                        <TextInput
+                            placeholder="Họ tên"
+                            style={styles.input}
+                            editable={!isLoading}
+                            placeholderTextColor="#d1d5db"
+                            onChangeText={(text) => setFullName(text)}
+                            value={fullName}
+                        ></TextInput>
+                    </View>
+
+                    <View style={styles.form}>
+                        <Icon name="phone" size={24} color="gray" />
+                        <TextInput
+                            placeholder="Số điện thoại (tùy chọn)"
+                            style={styles.input}
+                            editable={!isLoading}
+                            placeholderTextColor="#d1d5db"
+                            onChangeText={(text) => setPhone(text)}
+                            value={phone}
+                            keyboardType="phone-pad"
+                        ></TextInput>
+                    </View>
+                </>
+            )}
+
+            <View style={styles.form}>
                 <Icon name="email" size={24} color="gray" />
-                <TextInput 
-                    placeholder="Email Address" 
+                <TextInput
+                    placeholder="Email Address"
                     style={styles.input}
-                    editable={true}
+                    editable={!isLoading}
                     placeholderTextColor="#d1d5db"
                     onChangeText={(text) => setEmail(text)}
                     value={email}
+                    keyboardType="email-address"
                 ></TextInput>
             </View>
 
-            <View style ={styles.form}>
+            <View style={styles.form}>
                 <Icon name="locked" size={24} color="gray" />
-                <TextInput 
-                    placeholder="Password" 
+                <TextInput
+                    placeholder="Password"
                     style={styles.input}
-                    editable={true}
+                    editable={!isLoading}
                     placeholderTextColor="#d1d5db"
                     secureTextEntry={true}
                     onChangeText={(text) => setPassword(text)}
@@ -79,22 +191,32 @@ const LoginScreen = ({ navigation }: any)=>{
                 <Icon name="eye-off" size={20} color="#d1d5db" />
             </View>
 
-            <View style={styles.rememberContainer}>
-                <TouchableOpacity 
-                    style={[styles.checkbox, isRemember && styles.checkboxActive]}
-                    onPress={() => setIsRemember(!isRemember)}
-                >
-                    {isRemember && <Icon name="check" size={14} color="white" />}
-                </TouchableOpacity>
-                <Text style={styles.rememberText}>Save password</Text>
-                <Text style={styles.forgotText}>Forgot password?</Text>
-            </View>
+            {!isRegister && (
+                <View style={styles.rememberContainer}>
+                    <TouchableOpacity
+                        style={[styles.checkbox, isRemember && styles.checkboxActive]}
+                        onPress={() => setIsRemember(!isRemember)}
+                    >
+                        {isRemember && <Icon name="check" size={14} color="white" />}
+                    </TouchableOpacity>
+                    <Text style={styles.rememberText}>Lưu mật khẩu</Text>
+                    <Text style={styles.forgotText}>Quên mật khẩu?</Text>
+                </View>
+            )}
 
-            <TouchableOpacity style={styles.button} onPress={handleLogin}>
-                <Text style={styles.buttonText}>Login</Text>
+            <TouchableOpacity
+                style={[styles.button, isLoading && styles.buttonDisabled]}
+                onPress={handleSubmit}
+                disabled={isLoading}
+            >
+                {isLoading ? (
+                    <ActivityIndicator color="white" />
+                ) : (
+                    <Text style={styles.buttonText}>{isRegister ? 'Đăng Ký' : 'Đăng Nhập'}</Text>
+                )}
             </TouchableOpacity>
 
-            <Text style={styles.orContinue}>Or continue with</Text>
+            <Text style={styles.orContinue}>Hoặc tiếp tục với</Text>
 
             <View style={styles.socialContainer}>
                 <TouchableOpacity style={styles.socialButton} >
@@ -103,162 +225,171 @@ const LoginScreen = ({ navigation }: any)=>{
             </View>
 
             <View style={styles.signupContainer}>
-                <Text style={styles.signupText}>Didn't have an account? </Text>
-                <TouchableOpacity>
-                    <Text style={styles.signupLink}>Sign Up</Text>
+                <Text style={styles.signupText}>{isRegister ? 'Đã có tài khoản? ' : 'Chưa có tài khoản? '}</Text>
+                <TouchableOpacity onPress={() => {
+                    setIsRegister(!isRegister);
+                    setEmail('');
+                    setPassword('');
+                    setFullName('');
+                    setPhone('');
+                }}>
+                    <Text style={styles.signupLink}>{isRegister ? 'Đăng Nhập' : 'Đăng Ký'}</Text>
                 </TouchableOpacity>
             </View>
-       
-        
-    </SafeAreaView>
-      
+
+
+        </SafeAreaView>
+
     )
 }
 
 const styles = StyleSheet.create({
-    container:{
-        flex:1,
-        backgroundColor:'#f5f5f5ff'
+    container: {
+        flex: 1,
+        backgroundColor: '#f5f5f5ff'
     },
-    backButton:{
-        padding:16,
-        width:50,
-        height:50,
-        borderRadius:25,
-        backgroundColor:'#e5e7eb',
-        alignItems:'center',
-        justifyContent:'center',
-        marginTop:10,
-        marginLeft:16,
+    backButton: {
+        padding: 16,
+        width: 50,
+        height: 50,
+        borderRadius: 25,
+        backgroundColor: '#e5e7eb',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 10,
+        marginLeft: 16,
     },
-    header:{
-        marginHorizontal:16,
-        marginTop:20,
-        alignItems:'center'
+    header: {
+        marginHorizontal: 16,
+        marginTop: 20,
+        alignItems: 'center'
     },
-    welcomeTitle:{
-        fontSize:28,
-        fontWeight:'bold',
-        color:'black',
-        marginBottom:8,
+    welcomeTitle: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: 'black',
+        marginBottom: 8,
     },
-    title:{
-        marginTop:30,
-        alignItems:'center'
+    title: {
+        marginTop: 30,
+        alignItems: 'center'
     },
-    form:{
-        flexDirection:'row',
-        alignItems:'center',
-        marginHorizontal:16,
-        marginTop:20,
-        backgroundColor:'#f3f4f6',
-        borderRadius:12,
-        paddingHorizontal:16,
+    form: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 16,
+        marginTop: 20,
+        backgroundColor: '#f3f4f6',
+        borderRadius: 12,
+        paddingHorizontal: 16,
     },
-    group:{
-        backgroundColor:'red',
+    group: {
+        backgroundColor: 'red',
     },
-    input:{
-        padding:16,
-        height:56,
-        flex:1,
-        fontSize:16,
-        color:'black',
-        borderWidth:0,
+    input: {
+        padding: 16,
+        height: 56,
+        flex: 1,
+        fontSize: 16,
+        color: 'black',
+        borderWidth: 0,
     },
-    icon:{
-        fontSize:25,
-        position:'absolute',
-        top:10,
+    icon: {
+        fontSize: 25,
+        position: 'absolute',
+        top: 10,
     },
-    button:{
-        backgroundColor:'#1f2937',
-        padding:16,
-        marginHorizontal:16,
-        marginTop:24,
-        borderRadius:28,
-        alignItems:'center',
+    button: {
+        backgroundColor: '#1f2937',
+        padding: 16,
+        marginHorizontal: 16,
+        marginTop: 24,
+        borderRadius: 28,
+        alignItems: 'center',
     },
-    buttonText:{
-        color:'white',
-        fontSize:16,
-        fontWeight:'600',
+    buttonDisabled: {
+        opacity: 0.6,
     },
-    rememberContainer:{
-        flexDirection:'row',
-        alignItems:'center',
-        marginHorizontal:16,
-        marginTop:16,
-        justifyContent:'space-between',
+    buttonText: {
+        color: 'white',
+        fontSize: 16,
+        fontWeight: '600',
     },
-    checkbox:{
-        width:20,
-        height:20,
-        borderRadius:4,
-        borderWidth:2,
-        borderColor:'#d1d5db',
-        alignItems:'center',
-        justifyContent:'center',
+    rememberContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginHorizontal: 16,
+        marginTop: 16,
+        justifyContent: 'space-between',
     },
-    checkboxActive:{
-        backgroundColor:'#d1d5db',
-        borderColor:'#d1d5db',
+    checkbox: {
+        width: 20,
+        height: 20,
+        borderRadius: 4,
+        borderWidth: 2,
+        borderColor: '#d1d5db',
+        alignItems: 'center',
+        justifyContent: 'center',
     },
-    rememberText:{
-        flex:1,
-        marginLeft:10,
-        color:'#d1d5db',
-        fontSize:14,
+    checkboxActive: {
+        backgroundColor: '#d1d5db',
+        borderColor: '#d1d5db',
     },
-    forgotText:{
-        color:'#f97316',
-        fontSize:14,
-        fontWeight:'600',
+    rememberText: {
+        flex: 1,
+        marginLeft: 10,
+        color: '#d1d5db',
+        fontSize: 14,
     },
-    orContinue:{
-        textAlign:'center',
-        color:'#9ca3af',
-        fontSize:14,
-        marginTop:24,
-        marginBottom:16,
+    forgotText: {
+        color: '#f97316',
+        fontSize: 14,
+        fontWeight: '600',
     },
-    socialContainer:{
-        flexDirection:'row',
-        justifyContent:'center',
-        gap:16,
-        marginHorizontal:16,
+    orContinue: {
+        textAlign: 'center',
+        color: '#9ca3af',
+        fontSize: 14,
+        marginTop: 24,
+        marginBottom: 16,
     },
-    socialButton:{
-        width:56,
-        height:56,
-        borderRadius:28,
-        backgroundColor:'#f3f4f6',
-        alignItems:'center',
-        justifyContent:'center',
-        borderWidth:1,
-        borderColor:'#e5e7eb',
+    socialContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        gap: 16,
+        marginHorizontal: 16,
     },
-    socialIcon:{
-        fontSize:24,
-        color:'#6b7280',
-        fontWeight:'600',
+    socialButton: {
+        width: 56,
+        height: 56,
+        borderRadius: 28,
+        backgroundColor: '#f3f4f6',
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: '#e5e7eb',
     },
-    signupContainer:{
-        flexDirection:'row',
-        justifyContent:'center',
-        marginTop:24,
-        marginBottom:20,
+    socialIcon: {
+        fontSize: 24,
+        color: '#6b7280',
+        fontWeight: '600',
     },
-    signupText:{
-        color:'#9ca3af',
-        fontSize:14,
+    signupContainer: {
+        flexDirection: 'row',
+        justifyContent: 'center',
+        marginTop: 24,
+        marginBottom: 20,
     },
-    signupLink:{
-        color:'#1f2937',
-        fontSize:14,
-        fontWeight:'600',
+    signupText: {
+        color: '#9ca3af',
+        fontSize: 14,
     },
-    
+    signupLink: {
+        color: '#1f2937',
+        fontSize: 14,
+        fontWeight: '600',
+    },
+
 })
 
 export default LoginScreen;

@@ -7,10 +7,10 @@ const {
   sendMessage,
   markAsRead,
 } = require('../controllers/chatController');
-const { auth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // All routes are protected
-router.use(auth);
+router.use(protect);
 
 router.post('/conversation', getOrCreateConversation);
 router.get('/conversations', getConversations);

@@ -1,0 +1,37 @@
+﻿const handleBuyNow = async () => {
+  const token = await AsyncStorage.getItem('authToken');
+  
+  if (!token) {
+    Alert.alert('Lỗi', 'Vui lòng đăng nhập để mua hàng');
+    return;
+  }
+
+  setShowAddressModal(true);
+};
+
+const handleConfirmOrder = async () => {
+  if (!shippingAddress.trim()) {
+    Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ giao hàng');
+    return;
+  }
+
+  try {
+    const orderResponse = await orderAPI.createOrder(
+      [{ productId: product.id, quantity: quantity }],
+      shippingAddress.trim()
+    );
+
+    if (orderResponse.success) {
+      setShowAddressModal(false);
+      setShippingAddress('');
+      Alert.alert('Thành công', 'Đơn hàng đã được tạo', [
+        { text: 'Xem đơn hàng', onPress: () => navigation.navigate('Transactions') },
+        { text: 'Tiếp tục mua', onPress: () => navigation.goBack() },
+      ]);
+    } else {
+      Alert.alert('Lỗi', orderResponse.message || 'Tạo đơn hàng thất bại');
+    }
+  } catch (error: any) {
+    Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra');
+  }
+};

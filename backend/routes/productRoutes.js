@@ -8,16 +8,16 @@ const {
   updateProduct,
   deleteProduct,
 } = require('../controllers/productController');
-const { auth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Public routes
 router.get('/', getAllProducts);
 router.get('/featured', getFeaturedProducts);
 
 // Protected routes (seller)
-router.get('/my-products', auth, getMyProducts);
-router.post('/create', auth, createProduct);
-router.put('/:productId', auth, updateProduct);
-router.delete('/:productId', auth, deleteProduct);
+router.get('/my-products', protect, getMyProducts);
+router.post('/create', protect, createProduct);
+router.put('/:productId', protect, updateProduct);
+router.delete('/:productId', protect, deleteProduct);
 
 module.exports = router;

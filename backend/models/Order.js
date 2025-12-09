@@ -17,13 +17,37 @@ const Order = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    shipperId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: 'Users',
+        key: 'id'
+      }
+    },
     totalPrice: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    shippingFee: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+    },
     status: {
-      type: DataTypes.ENUM('pending', 'approved', 'shipped', 'delivered', 'cancelled'),
+      type: DataTypes.ENUM('pending', 'approved', 'shipping', 'delivered', 'cancelled'),
       defaultValue: 'pending',
+    },
+    paymentMethod: {
+      type: DataTypes.ENUM('COD', 'MoMo', 'Card'),
+      defaultValue: 'COD',
+    },
+    paymentStatus: {
+      type: DataTypes.ENUM('pending', 'paid', 'failed'),
+      defaultValue: 'pending',
+    },
+    momoTransactionId: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
     },
     shippingAddress: {
       type: DataTypes.TEXT,

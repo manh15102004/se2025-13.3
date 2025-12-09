@@ -6,14 +6,14 @@ const {
     updateReview,
     deleteReview,
 } = require('../controllers/reviewController');
-const { auth } = require('../middleware/auth');
+const { protect } = require('../middleware/auth');
 
 // Public routes
 router.get('/product/:productId', getProductReviews);
 
 // Protected routes
-router.post('/create', auth, createReview);
-router.put('/:id', auth, updateReview);
-router.delete('/:id', auth, deleteReview);
+router.post('/create', protect, createReview);
+router.put('/:id', protect, updateReview);
+router.delete('/:id', protect, deleteReview);
 
 module.exports = router;
