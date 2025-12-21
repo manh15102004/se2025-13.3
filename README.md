@@ -398,29 +398,3 @@ git push
 4. Push to branch (`git push origin feature/AmazingFeature`)
 5. Tạo Pull Request
 
----
-
-## 📞 Liên Hệ
-
-- **Repository:** https://github.com/manh15102004/se2025-13.3
-- **Issues:** https://github.com/manh15102004/se2025-13.3/issues
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🎓 Team Members
-
-Thêm tên các thành viên trong team tại đây:
-
-- Member 1 - Role
-- Member 2 - Role
-- Member 3 - Role
-
----
-
-**Happy Coding! 🚀**
