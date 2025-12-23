@@ -1,0 +1,94 @@
+[00:00:01.078] Server  LOG      ✓ Ready in 771ms
+[00:00:44.776] Server  ERROR    ⨯ ./src/app/layout.tsx:37:37
+Parsing ecmascript source code failed
+  35 |         {children}
+  36 |         {/* Mobile bottom navigation */}
+> 37 |         <div className="md:hidden"><!-- Mobile nav mounted client-side -->
+     |                                     ^
+  38 |           <script dangerouslySetInnerHTML={{ __html: `/* placeholder to reserve space for mobile nav */` }} />
+  39 |         </div>
+  40 |       </body>
+
+Expected '</', got '!'
+
+
+[00:00:45.848] Browser ERROR   uncaughtError: Error: ./src/app/layout.tsx:37:37
+Parsing ecmascript source code failed
+  35 |         {children}
+  36 |         {/* Mobile bottom navigation */}
+> 37 |         <div className="md:hidden"><!-- Mobile nav mounted client-side -->
+     |                                     ^
+  38 |           <script dangerouslySetInnerHTML={{ __html: `/* placeholder to reserve space for mobile nav */` }} />
+  39 |         </div>
+  40 |       </body>
+
+Expected '</', got '!'
+
+
+[00:00:46.011] Browser ERROR   ./src/app/layout.tsx:37:37
+Parsing ecmascript source code failed
+  35 |         {children}
+  36 |         {/* Mobile bottom navigation */}
+> 37 |         <div className="md:hidden"><!-- Mobile nav mounted client-side -->
+     |                                     ^
+  38 |           <script dangerouslySetInnerHTML={{ __html: `/* placeholder to reserve space for mobile nav */` }} />
+  39 |         </div>
+  40 |       </body>
+
+Expected '</', got '!'
+[00:00:46.392] Browser ERROR   ./src/app/layout.tsx:37:37
+Parsing ecmascript source code failed
+  35 |         {children}
+  36 |         {/* Mobile bottom navigation */}
+> 37 |         <div className="md:hidden"><!-- Mobile nav mounted client-side -->
+     |                                     ^
+  38 |           <script dangerouslySetInnerHTML={{ __html: `/* placeholder to reserve space for mobile nav */` }} />
+  39 |         </div>
+  40 |       </body>
+
+Expected '</', got '!'
+[00:01:28.078] Server  LOG      ✓ Compiled in 627ms
+[00:04:32.213] Server  WARN     ⚠ Cross origin request detected from 192.168.1.5 to /_next/* resource. In a future major version of Next.js, you will need to explicitly configure "allowedDevOrigins" in next.config to allow this.
+Read more: https://nextjs.org/docs/app/api-reference/config/next-config-js/allowedDevOrigins
+[00:04:32.586] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerLayoutRouter url="/" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} segmentPath={[...]} ...>
+      <SegmentViewNode type="page" pagePath="page.tsx">
+        <SegmentTrieNode>
+        <ClientPageRoot Component={function Home} serverProvidedParams={{...}}>
+          <Home params={Promise} searchParams={Promise}>
+            <Header>
+            <main>
+              <section>
+              <section>
+              <section className="bg-gray-50...">
+                <div className="max-w-7xl ...">
+                  <div>
+                  <div className="grid grid-...">
+                    <ProductCard id="1" name="Điện thoại..." price={4990000} originalPrice={6990000} ...>
+                      <div className="bg-white r...">
+                        <div>
+                        <div className="p-3">
+                          <h3>
+                          <div className="flex items...">
+                            <span className="text-lg fo...">
++                             4.990.000
+-                             4,990,000
+                            ...
+                          ...
+                    ...
+              ...
+            ...
+      ...
+

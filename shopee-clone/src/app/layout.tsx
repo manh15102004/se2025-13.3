@@ -1,0 +1,44 @@
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "./globals.css";
+
+const geistSans = Geist({
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
+});
+
+const geistMono = Geist_Mono({
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
+});
+
+export const metadata: Metadata = {
+  title: "Shopee Clone - Sàn thương mại điện tử",
+  description: "Nền tảng mua bán trực tuyến với hàng triệu sản phẩm",
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <head>
+        <link rel="manifest" href="/manifest.webmanifest" />
+        <meta name="theme-color" content="#ff3b3b" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+      </head>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+        {/* Mobile bottom navigation */}
+        <div className="md:hidden">
+          {/* Mobile nav mounted client-side (placeholder to reserve space for mobile nav) */}
+          <script dangerouslySetInnerHTML={{ __html: `/* placeholder to reserve space for mobile nav */` }} />
+        </div>
+      </body>
+    </html>
+  );
+}
