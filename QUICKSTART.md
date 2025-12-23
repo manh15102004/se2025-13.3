@@ -1,153 +1,197 @@
-# Quick Start Guide for Shopee Clone
+# 🚀 Quick Start Guide - Dành Cho Team Members
 
-## Prerequisites
-- Node.js 18+ installed
-- MongoDB (local or cloud - MongoDB Atlas)
+## ⚡ Bắt Đầu Nhanh (5 Phút)
 
-## Setup Instructions
-
-### 1. Navigate to project directory
+### 1. Clone và Cài Đặt
 ```bash
-cd C:\Users\Quan\PycharmProjects\shopee-clone
-```
+# Clone repository
+git clone https://github.com/manh15102004/se2025-13.3.git
+cd se2025-13.3
 
-### 2. Install dependencies (if not already done)
-```bash
+# Cài đặt dependencies
 npm install
+cd backend && npm install && cd ..
 ```
 
-### 3. Configure Environment Variables
-
-Create or update `.env.local`:
-```
-MONGODB_URI=mongodb://localhost:27017/shopee-clone
-JWT_SECRET=your-secret-key-change-this-in-production
-NEXT_PUBLIC_API_URL=http://localhost:3000
-```
-
-### 4. Start MongoDB (choose one)
-
-**Option A: Local MongoDB**
+### 2. Setup Database
 ```bash
-mongod
+# Tạo database trong MySQL
+CREATE DATABASE appsale_db;
+
+# Tạo file backend/.env
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your_password
+DB_NAME=appsale_db
+JWT_SECRET=secret123
+PORT=3000
+
+# Chạy migration
+cd backend
+node setup-database.js
+cd ..
 ```
 
-**Option B: MongoDB Atlas (Cloud)**
-- Sign up at https://www.mongodb.com/cloud/atlas
-- Create a cluster
-- Get connection string
-- Update `MONGODB_URI` in `.env.local`
-
-### 5. Run Development Server
+### 3. Chạy Ứng Dụng
 ```bash
+# Terminal 1 - Backend
+cd backend
 npm run dev
+
+# Terminal 2 - Frontend
+npm start
+# Nhấn 'a' cho Android hoặc 'i' cho iOS
 ```
-
-### 6. Open in Browser
-Navigate to `http://localhost:3000`
-
-## Features to Try
-
-### Homepage
-- View featured products
-- See product categories
-- Learn about the platform
-
-### Product Listing
-- Browse all products
-- View product details
-- Add items to cart
-
-### Shopping Cart
-- Add/remove products
-- Adjust quantities
-- See total price
-- Checkout (demo)
-
-### Account
-- View account information
-- Order history (placeholder)
-
-## API Endpoints to Test
-
-### Get All Products
-```bash
-curl http://localhost:3000/api/products
-```
-
-### Register User
-```bash
-curl -X POST http://localhost:3000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","name":"Test User"}'
-```
-
-### Login
-```bash
-curl -X POST http://localhost:3000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
-```
-
-### Create Order
-```bash
-curl -X POST http://localhost:3000/api/orders \
-  -H "Content-Type: application/json" \
-  -d '{
-    "userId":"user123",
-    "items":[{"productId":"1","name":"Product","price":100000,"quantity":1,"image":"url"}],
-    "totalAmount":100000,
-    "shippingAddress":"123 Street",
-    "paymentMethod":"card"
-  }'
-```
-
-## Project Structure
-
-- `/src/app` - Page routes and API endpoints
-- `/src/components` - React components (Header, Footer, ProductCard)
-- `/src/models` - MongoDB models (User, Product, Order)
-- `/src/stores` - Zustand state management (cartStore)
-- `/src/lib` - Utilities (database, authentication)
-
-## Deployment
-
-### Deploy to Vercel
-1. Push code to GitHub
-2. Connect repository to Vercel
-3. Set environment variables in Vercel dashboard
-4. Deploy!
-
-## Troubleshooting
-
-### MongoDB Connection Error
-- Ensure MongoDB is running
-- Check `MONGODB_URI` in `.env.local`
-- Try connecting with MongoDB Compass to test connection
-
-### Port 3000 Already in Use
-```bash
-npm run dev -- -p 3001
-```
-
-### Build Errors
-```bash
-# Clear Next.js cache
-rm -r .next
-
-# Rebuild
-npm run build
-```
-
-## Next Steps
-
-- Implement user authentication UI
-- Add product search and filtering
-- Connect Stripe for payments
-- Add email notifications
-- Build admin dashboard
-- Deploy to production
 
 ---
 
-Happy Coding! 🚀
+## 📋 Quy Trình Làm Việc Hàng Ngày
+
+### Bước 1: Cập Nhật Code Mới Nhất
+```bash
+git checkout develop
+git pull origin develop
+```
+
+### Bước 2: Tạo Nhánh Feature
+```bash
+# Tạo nhánh mới từ develop
+git checkout -b feature/ten-tinh-nang
+
+# Ví dụ:
+git checkout -b feature/user-authentication
+git checkout -b feature/payment-integration
+git checkout -b bugfix/cart-error
+```
+
+### Bước 3: Code và Commit
+```bash
+# Làm việc trên code...
+
+# Kiểm tra thay đổi
+git status
+
+# Add và commit
+git add .
+git commit -m "feat(auth): Add login functionality"
+
+# Push lên GitHub
+git push -u origin feature/user-authentication
+```
+
+### Bước 4: Tạo Pull Request
+1. Vào https://github.com/manh15102004/se2025-13.3
+2. Click "Compare & pull request"
+3. Base: `develop` ← Compare: `feature/user-authentication`
+4. Viết mô tả và tạo PR
+5. Chờ review và merge
+
+### Bước 5: Sau Khi Merge
+```bash
+# Cập nhật develop
+git checkout develop
+git pull origin develop
+
+# Xóa nhánh feature (optional)
+git branch -d feature/user-authentication
+```
+
+---
+
+## ⚠️ QUY TẮC QUAN TRỌNG
+
+### ❌ KHÔNG BAO GIỜ:
+- Push trực tiếp lên `main`
+- Force push lên `develop` hoặc `main`
+- Commit code chưa test
+- Commit file có lỗi
+
+### ✅ LUÔN LUÔN:
+- Pull trước khi bắt đầu làm việc
+- Tạo nhánh feature mới từ `develop`
+- Viết commit message rõ ràng
+- Tạo Pull Request để merge code
+- Test code trước khi commit
+
+---
+
+## 📝 Commit Message Format
+
+```bash
+<type>(<scope>): <subject>
+
+# Types:
+feat     - Tính năng mới
+fix      - Sửa bug
+docs     - Cập nhật docs
+style    - Format code
+refactor - Refactor code
+test     - Thêm test
+chore    - Cập nhật dependencies
+
+# Ví dụ:
+git commit -m "feat(auth): Add Google login"
+git commit -m "fix(cart): Fix total calculation"
+git commit -m "docs(readme): Update setup guide"
+```
+
+---
+
+## 🆘 Xử Lý Lỗi Thường Gặp
+
+### Backend không kết nối được
+```bash
+# Kiểm tra backend đang chạy
+cd backend
+npm run dev
+
+# Kiểm tra MySQL đang chạy
+# Kiểm tra file .env
+```
+
+### Git Conflict
+```bash
+# Cập nhật develop
+git checkout develop
+git pull origin develop
+
+# Merge vào nhánh feature
+git checkout feature/your-feature
+git merge develop
+
+# Sửa conflict trong editor
+git add .
+git commit -m "merge: Resolve conflicts"
+git push
+```
+
+### Module not found
+```bash
+# Cài lại dependencies
+rm -rf node_modules
+npm install
+
+cd backend
+rm -rf node_modules
+npm install
+```
+
+---
+
+## 🔗 Links Quan Trọng
+
+- **Repository:** https://github.com/manh15102004/se2025-13.3
+- **README Đầy Đủ:** [README.md](README.md)
+- **Issues:** https://github.com/manh15102004/se2025-13.3/issues
+
+---
+
+## 📞 Cần Giúp Đỡ?
+
+1. Đọc [README.md](README.md) đầy đủ
+2. Tạo issue trên GitHub
+3. Hỏi trong group chat
+
+---
+
+**Chúc code vui vẻ! 🎉**
