@@ -1,0 +1,47 @@
+// Add this function after handleBuyNow (around line 80)
+
+const handleConfirmOrder = async () => {
+  if (!shippingAddress.trim()) {
+    Alert.alert('Lỗi', 'Vui lòng nhập địa chỉ giao hàng');
+    return;
+  }
+
+  try {
+    console.log('Creating order for product:', product.id, 'quantity:', quantity);
+
+    const orderResponse = await orderAPI.createOrder(
+      [{ productId: product.id, quantity: quantity }],
+      shippingAddress.trim()
+    );
+
+    if (orderResponse.success) {
+      console.log('Order created successfully:', orderResponse.data);
+      setShowAddressModal(false);
+      setShippingAddress('');
+      Alert.alert('Thành công', 'Đơn hàng đã được tạo', [
+        { text: 'Xem đơn hàng', onPress: () => navigation.navigate('Transactions') },
+        { text: 'Tiếp tục mua', onPress: () => navigation.goBack() },
+      ]);
+    } else {
+      console.error('Order creation failed:', orderResponse.message);
+      Alert.alert('Lỗi', orderResponse.message || 'Tạo đơn hàng thất bại');
+    }
+  } catch (error: any) {
+    console.error('Order creation error:', error);
+    Alert.alert('Lỗi', error.message || 'Có lỗi xảy ra khi tạo đơn hàng');
+  }
+};
+
+// Also replace handleBuyNow (line 70-118) with:
+
+const handleBuyNow = async () => {
+  const token = await AsyncStorage.getItem('authToken');
+  
+  if (!token) {
+    Alert.alert('Lỗi', 'Vui lòng đăng nhập để mua hàng');
+    return;
+  }
+
+  // Show modal for address input (Android compatible)
+  setShowAddressModal(true);
+};
