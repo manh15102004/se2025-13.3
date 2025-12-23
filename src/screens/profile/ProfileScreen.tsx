@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   SafeAreaView,
   View,
@@ -10,10 +10,13 @@ import {
   Alert,
   ActivityIndicator,
   Modal,
+  Image,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Feather';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { launchImageLibrary } from 'react-native-image-picker';
 import { authAPI } from '../../api/client';
 
 const ProfileScreen = ({ navigation }: any) => {
@@ -31,9 +34,11 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const avatarOptions = ['👤', '👨', '👩', '🧑', '👨‍💼', '👩‍💼', '🧑‍💼', '👨‍🎓', '👩‍🎓', '🧑‍🎓', '👨‍⚕️', '👩‍⚕️'];
 
-  useEffect(() => {
-    loadUserData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      loadUserData();
+    }, [])
+  );
 
   const loadUserData = async () => {
     try {
@@ -60,7 +65,7 @@ const ProfileScreen = ({ navigation }: any) => {
     try {
       const response = await authAPI.updateProfile(formData);
       if (response.success) {
-        Alert.alert('Thành công', 'Cập nhật thông tin thành công');
+        // Cập nhật thành công, tắt edit mode để user thấy thông tin mới
         setUser({ ...user, ...formData });
         setEditMode(false);
       } else {
@@ -71,24 +76,35 @@ const ProfileScreen = ({ navigation }: any) => {
     }
   };
 
-  const handlePickImage = () => {
-    Alert.prompt(
-      'Nhập URL ảnh',
-      'Dán link ảnh từ web (ví dụ: https://i.imgur.com/abc.jpg):',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'OK',
-          onPress: (url) => {
-            if (url && url.trim()) {
-              setFormData({ ...formData, avatar: url.trim() });
-              setShowAvatarPicker(false);
-            }
-          },
-        },
-      ],
-      'plain-text'
-    );
+  const handlePickImage = async () => {
+    try {
+      const result = await launchImageLibrary({
+        mediaType: 'photo',
+        quality: 0.5,
+        includeBase64: true,
+        maxWidth: 500,
+        maxHeight: 500,
+      });
+
+      if (result.didCancel) {
+        return;
+      }
+
+      if (result.errorCode) {
+        Alert.alert('Lỗi', 'Không thể mở thư viện ảnh: ' + result.errorMessage);
+        return;
+      }
+
+      if (result.assets?.[0]?.base64) {
+        // Tạo chuỗi base64
+        const imageUri = `data:${result.assets[0].type};base64,${result.assets[0].base64}`;
+        setFormData({ ...formData, avatar: imageUri });
+        setShowAvatarPicker(false);
+      }
+    } catch (error) {
+      console.error('Pick Image Error:', error);
+      Alert.alert('Lỗi', 'Có lỗi xảy ra khi chọn ảnh');
+    }
   };
 
   const handleLogout = () => {
@@ -97,7 +113,16 @@ const ProfileScreen = ({ navigation }: any) => {
       {
         text: 'Đăng xuất',
         onPress: async () => {
-          await AsyncStorage.removeItem('authToken');
+          // Xóa TẤT CẢ dữ liệu AsyncStorage
+          await AsyncStorage.multiRemove([
+            'authToken',
+            'user',
+            'userId',
+            'cart',
+            'favorites',
+          ]);
+
+          // Reset điều hướng về màn hình Đăng nhập
           navigation.reset({
             index: 0,
             routes: [{ name: 'Login' }],
@@ -120,22 +145,34 @@ const ProfileScreen = ({ navigation }: any) => {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Hồ sơ</Text>
-        <TouchableOpacity onPress={() => setEditMode(!editMode)}>
-          <Icon name={editMode ? "x" : "edit-2"} size={22} color="#1a1a2e" />
-        </TouchableOpacity>
+        <View style={{ width: 22 }} />
       </View>
 
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Profile Header */}
+        {/* Phần đầu hồ sơ */}
         <View style={styles.profileHeader}>
           <TouchableOpacity
             style={styles.avatar}
             onPress={() => editMode && setShowAvatarPicker(true)}
           >
-            {user?.avatar ? (
-              <Text style={styles.avatarEmoji}>{user.avatar}</Text>
+            {editMode ? (
+              // Hiển thị formData.avatar (xem trước)
+              formData.avatar && (formData.avatar.startsWith('http') || formData.avatar.startsWith('data:')) ? (
+                <Image source={{ uri: formData.avatar }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+              ) : formData.avatar ? (
+                <Text style={styles.avatarEmoji}>{formData.avatar}</Text>
+              ) : (
+                <IconAnt name="user" size={48} color="#4a90e2" />
+              )
             ) : (
-              <IconAnt name="user" size={48} color="#4a90e2" />
+              // Hiển thị user.avatar (đã lưu)
+              user?.avatar && (user.avatar.startsWith('http') || user.avatar.startsWith('data:')) ? (
+                <Image source={{ uri: user.avatar }} style={{ width: 100, height: 100, borderRadius: 50 }} />
+              ) : user?.avatar ? (
+                <Text style={styles.avatarEmoji}>{user.avatar}</Text>
+              ) : (
+                <IconAnt name="user" size={48} color="#4a90e2" />
+              )
             )}
           </TouchableOpacity>
           {editMode && (
@@ -145,7 +182,7 @@ const ProfileScreen = ({ navigation }: any) => {
           <Text style={styles.userEmail}>{user?.email}</Text>
         </View>
 
-        {/* Edit Form or Info Display */}
+        {/* Form chỉnh sửa hoặc Hiển thị thông tin */}
         {editMode ? (
           <View style={styles.editSection}>
             <Text style={styles.sectionTitle}>Chỉnh sửa thông tin</Text>
@@ -225,9 +262,9 @@ const ProfileScreen = ({ navigation }: any) => {
           </View>
         )}
 
-        {/* Menu Options */}
+        {/* Các tùy chọn Menu */}
         <View style={styles.menuSection}>
-          {/* Shipper Dashboard - Only show for shipper role */}
+          {/* Bảng điều khiển Shipper - Chỉ hiện cho vai trò shipper */}
           {user?.role === 'shipper' && (
             <TouchableOpacity
               style={[styles.menuItem, styles.shipperItem]}
@@ -239,23 +276,40 @@ const ProfileScreen = ({ navigation }: any) => {
             </TouchableOpacity>
           )}
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="heart" size={20} color="#666" />
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('EditProfile' as any)}>
+            <Icon name="edit" size={20} color="#4a90e2" />
+            <Text style={styles.menuText}>Chỉnh sửa hồ sơ</Text>
+            <Icon name="chevron-right" size={20} color="#ccc" />
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('Wishlist' as any)}>
+            <Icon name="heart" size={20} color="#ef4444" />
             <Text style={styles.menuText}>Yêu thích</Text>
             <Icon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="settings" size={20} color="#666" />
-            <Text style={styles.menuText}>Cài đặt</Text>
+          <TouchableOpacity
+            style={styles.menuItem}
+            onPress={() => {
+              if (user?.id) {
+                navigation.navigate('ShopProfile', { shopId: user.id });
+              }
+            }}
+          >
+            <Icon name="shopping-bag" size={20} color="#F59E0B" />
+            <Text style={styles.menuText}>Shop của tôi</Text>
             <Icon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem}>
-            <Icon name="help-circle" size={20} color="#666" />
-            <Text style={styles.menuText}>Trợ giúp</Text>
+
+
+          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate('ChangePassword' as any)}>
+            <Icon name="lock" size={20} color="#4a90e2" />
+            <Text style={styles.menuText}>Đổi mật khẩu</Text>
             <Icon name="chevron-right" size={20} color="#ccc" />
           </TouchableOpacity>
+
+
 
           <TouchableOpacity style={[styles.menuItem, styles.logoutItem]} onPress={handleLogout}>
             <Icon name="log-out" size={20} color="#ef4444" />
@@ -264,7 +318,7 @@ const ProfileScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
 
-        {/* Avatar Picker Modal */}
+        {/* Modal chọn Avatar */}
         <Modal
           visible={showAvatarPicker}
           transparent={true}
@@ -292,8 +346,8 @@ const ProfileScreen = ({ navigation }: any) => {
                 style={styles.uploadButton}
                 onPress={handlePickImage}
               >
-                <Icon name="link" size={20} color="#4a90e2" />
-                <Text style={styles.uploadButtonText}>Nhập URL ảnh</Text>
+                <Icon name="image" size={20} color="#4a90e2" />
+                <Text style={styles.uploadButtonText}>Chọn từ thư viện</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.modalCloseButton}

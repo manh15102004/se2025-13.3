@@ -1,39 +1,21 @@
-import { StackNavigationProp } from '@react-navigation/stack';
-import { Product } from '../data/products';
-
 export type RootStackParamList = {
-  Home: undefined;
-  ProductDetail: { product: Product };
-  Login: undefined;
-  Products: undefined;
-  Transactions: undefined;
-  Profile: undefined;
-  Cart: undefined;
-  Notifications: undefined;
-  AllReviews: {
-    productId: number;
-    totalReviews: number;
-  };
-  OrderDetail: { order: any };
-
-  // Shipper screens
-  ShipperDashboard: undefined;
-  AvailableOrders: undefined;
-  MyDeliveries: undefined;
-  DeliveryDetail: { order: any };
+    Introduction: undefined;
+    Login: undefined;
+    Register: { role: string };
+    Home: undefined;
+    Products: { search?: string };
+    ProductDetail: { product: any };
+    Cart: undefined;
+    Checkout: { subtotal: number };
+    Transactions: undefined;
+    Notifications: undefined;
+    Profile: undefined;
+    ConversationList: undefined;
+    Chat: { conversationId: string; receiverName: string; receiverId?: number };
+    ShipperDashboard: undefined;
+    OrderDetail: { orderId: number };
+    CreateBanner: undefined;
+    AdminBanners: undefined;
+    ManageBanners: undefined;
+    ShopProfile: { shopId: number };
 };
-
-export type HomeScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Home'
->;
-
-export type ProductDetailScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'ProductDetail'
->;
-
-export type LoginScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'Login'
->;

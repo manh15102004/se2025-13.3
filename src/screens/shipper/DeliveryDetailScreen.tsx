@@ -9,6 +9,7 @@ import {
     TextInput,
 } from 'react-native';
 import { shipperAPI } from '../../api/client';
+import { formatPrice } from '../../utils/formatting';
 
 export default function DeliveryDetailScreen({ route, navigation }: any) {
     const { order } = route.params;
@@ -19,7 +20,7 @@ export default function DeliveryDetailScreen({ route, navigation }: any) {
         try {
             const response = await shipperAPI.updateDeliveryStatus(order.id, status);
             if (response.success) {
-                Alert.alert('Thành công', 'Đã cập nhật trạng thái!');
+                // Đã cập nhật trạng thái, quay lại
                 navigation.goBack();
             }
         } catch (error: any) {
@@ -39,7 +40,7 @@ export default function DeliveryDetailScreen({ route, navigation }: any) {
                         try {
                             const response = await shipperAPI.completeDelivery(order.id, true);
                             if (response.success) {
-                                Alert.alert('Thành công', 'Đã hoàn thành giao hàng!');
+                                // Đã giao thành công, quay về danh sách đơn của tôi
                                 navigation.navigate('MyDeliveries');
                             }
                         } catch (error: any) {
@@ -69,7 +70,8 @@ export default function DeliveryDetailScreen({ route, navigation }: any) {
                         try {
                             const response = await shipperAPI.cancelDelivery(order.id, cancelReason);
                             if (response.success) {
-                                Alert.alert('Đã hủy', 'Đơn hàng đã được hủy');
+                                // Đã hủy đơn, quay về danh sách đơn có sẵn
+                                Alert.alert('Đã hủy', 'Đơn hàng đã được hủy'); // Giữ lại alert này vì hủy là hành động quan trọng cần confirm kết quả
                                 navigation.navigate('AvailableOrders');
                             }
                         } catch (error: any) {
@@ -95,7 +97,7 @@ export default function DeliveryDetailScreen({ route, navigation }: any) {
                 </View>
                 <View style={styles.infoRow}>
                     <Text style={styles.label}>Tổng tiền:</Text>
-                    <Text style={styles.priceValue}>{order.totalPrice?.toLocaleString('vi-VN')} ₫</Text>
+                    <Text style={styles.priceValue}>{formatPrice(order.totalAmount)}</Text>
                 </View>
             </View>
 

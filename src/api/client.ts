@@ -1,16 +1,18 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const API_BASE_URL = 'http://10.125.88.206:5000/api'; // Your server IP
+export const API_BASE_URL = 'http://10.106.5.206:5000/api';
 
 interface ApiResponse<T = any> {
   success: boolean;
-  message?: string;
+  message?: any;
   data?: T;
   token?: string;
   user?: any;
+  messages?: any[];
+  conversations?: any[];
+  conversation?: any;
 }
 
-// Helper function to make API requests
 const apiRequest = async (
   method: 'GET' | 'POST' | 'PUT' | 'DELETE',
   endpoint: string,
@@ -27,7 +29,7 @@ const apiRequest = async (
     }
 
     const url = `${API_BASE_URL}${endpoint}`;
-    console.log('API Request:', { method, url, body }); // Debug
+    console.log('API Request:', { method, url, body });
 
     const response = await fetch(url, {
       method,
@@ -35,19 +37,19 @@ const apiRequest = async (
       body: body ? JSON.stringify(body) : undefined,
     });
 
-    console.log('API Response status:', response.status); // Debug
+    console.log('API Response status:', response.status);
 
     let data;
     try {
       data = await response.json();
-      console.log('API Response data:', data); // Debug
+      console.log('API Response data:', data);
     } catch (parseError) {
-      console.error('JSON Parse error:', parseError);
+      console.log('JSON Parse error:', parseError);
       throw new Error('Invalid server response');
     }
 
     if (!response.ok) {
-      console.error('API Error:', data); // Debug
+      console.log('API Error:', data);
       if (response.status === 401) {
         // Token expired or invalid
         await AsyncStorage.removeItem('authToken');
@@ -61,19 +63,20 @@ const apiRequest = async (
     }
     return { success: true, data, message: 'Success' };
   } catch (error: any) {
-    console.error('API Error:', error);
+    console.log('API Request Error:', error.message); // Changed to log to avoid LogBox
     throw error;
   }
 };
 
-// Auth API calls
+// API Xác thực
 export const authAPI = {
-  register: (email: string, password: string, fullName: string, phone?: string) =>
+  register: (email: string, password: string, fullName: string, phone?: string, role?: string) =>
     apiRequest('POST', '/auth/register', {
       email,
       password,
       fullName,
       phone,
+      role,
     }),
 
   login: (email: string, password: string) =>
@@ -86,7 +89,7 @@ export const authAPI = {
     apiRequest('PUT', '/auth/profile', data),
 };
 
-// Chat API calls
+// API Chat
 export const chatAPI = {
   getOrCreateConversation: (userId: string) =>
     apiRequest('POST', '/chat/conversation', { userId }),
@@ -97,20 +100,20 @@ export const chatAPI = {
   getMessages: (conversationId: string) =>
     apiRequest('GET', `/chat/messages/${conversationId}`),
 
-  sendMessage: (conversationId: string, content: string) =>
-    apiRequest('POST', '/chat/message', { conversationId, content }),
+  sendMessage: (conversationId: string, content: string, type: 'text' | 'image' | 'sticker' = 'text') =>
+    apiRequest('POST', '/chat/message', { conversationId, content, type }),
 
   markAsRead: (conversationId: string) =>
     apiRequest('PUT', '/chat/mark-as-read', { conversationId }),
 };
 
-// Cart API calls
+// API Giỏ hàng
 export const cartAPI = {
   getCart: () =>
     apiRequest('GET', '/cart'),
 
-  addToCart: (productId: number, quantity: number, price: number) =>
-    apiRequest('POST', '/cart/add', { productId, quantity, price }),
+  addToCart: (productId: number, quantity: number, price: number, size?: string) =>
+    apiRequest('POST', '/cart/add', { productId, quantity, price, size }),
 
   updateCartItem: (cartItemId: number, quantity: number) =>
     apiRequest('PUT', `/cart/${cartItemId}`, { quantity }),
@@ -122,7 +125,7 @@ export const cartAPI = {
     apiRequest('DELETE', '/cart'),
 };
 
-// Product API calls
+// API Sản phẩm
 export const productAPI = {
   getAllProducts: (category?: string, search?: string) => {
     let endpoint = '/products';
@@ -139,6 +142,12 @@ export const productAPI = {
   getMyProducts: () =>
     apiRequest('GET', '/products/my-products'),
 
+  getShopProducts: (shopId: number) =>
+    apiRequest('GET', `/products/shop/${shopId}`),
+
+  getProductById: (id: number) =>
+    apiRequest('GET', `/products/${id}`),
+
   createProduct: (name: string, price: number, category: string, subCategory: string, description?: string, quantity?: number, image?: string) =>
     apiRequest('POST', '/products/create', { name, price, category, subCategory, description, quantity, image }),
 
@@ -149,7 +158,7 @@ export const productAPI = {
     apiRequest('DELETE', `/products/${productId}`),
 };
 
-// Order API calls
+// API Đơn hàng
 export const orderAPI = {
   createOrder: (items: any[], shippingAddress?: string) =>
     apiRequest('POST', '/orders/create', { items, shippingAddress }),
@@ -160,11 +169,14 @@ export const orderAPI = {
   getMySalesOrders: () =>
     apiRequest('GET', '/orders/my-sales'),
 
+  getOrderById: (orderId: number) =>
+    apiRequest('GET', `/orders/${orderId}`),
+
   approveOrder: (orderId: number, deliveryDate?: string) =>
     apiRequest('PUT', `/orders/${orderId}/approve`, { deliveryDate }),
 
-  cancelOrder: (orderId: number) =>
-    apiRequest('PUT', `/orders/${orderId}/cancel`, {}),
+  cancelOrder: (orderId: number, reason?: string) =>
+    apiRequest('PUT', `/orders/${orderId}/cancel`, { reason }),
 
   getNotifications: () =>
     apiRequest('GET', '/orders/notifications'),
@@ -173,7 +185,7 @@ export const orderAPI = {
     apiRequest('PUT', `/orders/notifications/${notificationId}/read`, {}),
 };
 
-// Review API calls
+// API Đánh giá
 export const reviewAPI = {
   createReview: (productId: number, rating: number, comment: string) =>
     apiRequest('POST', '/reviews/create', { productId, rating, comment }),
@@ -185,8 +197,14 @@ export const reviewAPI = {
     apiRequest('DELETE', `/reviews/${reviewId}`),
 };
 
-// Shipper API calls
+// API Người giao hàng (Shipper)
 export const shipperAPI = {
+  getStats: () =>
+    apiRequest('GET', '/shipper/stats'),
+
+  getEarnings: (period?: string) =>
+    apiRequest('GET', `/shipper/earnings${period ? `?period=${period}` : ''}`),
+
   getAvailableOrders: () =>
     apiRequest('GET', '/shipper/available-orders'),
 
@@ -206,13 +224,54 @@ export const shipperAPI = {
     apiRequest('POST', `/shipper/cancel-delivery/${orderId}`, { reason }),
 };
 
-// Payment API calls
+// API Thanh toán
 export const paymentAPI = {
   createMoMoPayment: (orderId: number, amount: number) =>
     apiRequest('POST', '/payment/momo/create', { orderId, amount }),
 
   checkPaymentStatus: (orderId: number) =>
     apiRequest('GET', `/payment/status/${orderId}`),
+};
+
+// API Danh sách yêu thích
+export const wishlistAPI = {
+  addToWishlist: (productId: number) =>
+    apiRequest('POST', '/wishlist', { productId }),
+
+  removeFromWishlist: (productId: number) =>
+    apiRequest('DELETE', `/wishlist/${productId}`),
+
+  getMyWishlist: () =>
+    apiRequest('GET', '/wishlist'),
+
+  checkWishlistStatus: (productId: number) =>
+    apiRequest('GET', `/wishlist/check/${productId}`),
+};
+
+// Analytics API calls
+// Analytics API calls
+export const getSellerAnalytics = (period: 'day' | 'week' | 'month' = 'week') =>
+  apiRequest('GET', `/analytics/seller?period=${period}`);
+
+// API Người dùng/Mạng xã hội
+export const userAPI = {
+  followUser: (id: number) => apiRequest('POST', `/users/follow/${id}`),
+  unfollowUser: (id: number) => apiRequest('POST', `/users/unfollow/${id}`),
+  likeShop: (id: number) => apiRequest('POST', `/users/like-shop/${id}`),
+  unlikeShop: (id: number) => apiRequest('POST', `/users/unlike-shop/${id}`),
+  getFeaturedShops: () => apiRequest('GET', '/users/featured-shops'),
+};
+
+// API Banner (Quảng cáo)
+export const bannerAPI = {
+  getBanners: () => apiRequest('GET', '/banners'),
+  getAllBanners: () => apiRequest('GET', '/banners/all'), // Get all banners for admin
+  getMyBanners: () => apiRequest('GET', '/banners/my'),
+  getPendingBanners: () => apiRequest('GET', '/banners/pending'),
+  createBanner: (data: any) => apiRequest('POST', '/banners', data),
+  approveBanner: (id: number) => apiRequest('PUT', `/banners/${id}/approve`, {}),
+  rejectBanner: (id: number) => apiRequest('PUT', `/banners/${id}/reject`, {}),
+  deleteBanner: (id: number) => apiRequest('DELETE', `/banners/${id}`),
 };
 
 export default apiRequest;

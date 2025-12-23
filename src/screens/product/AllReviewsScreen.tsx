@@ -8,13 +8,14 @@ import {
     ScrollView,
     FlatList,
     ActivityIndicator,
+    Image,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 import IconAnt from 'react-native-vector-icons/AntDesign';
 import { reviewAPI } from '../../api/client';
 
 const AllReviewsScreen = ({ navigation, route }: any) => {
-    const { productId, productName, averageRating, totalReviews } = route.params;
+    const { productId, productName, averageRating, totalReviews } = route.params || {};
     const [reviews, setReviews] = useState<any[]>([]);
     const [filteredReviews, setFilteredReviews] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -22,8 +23,13 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
     const [starCounts, setStarCounts] = useState({ 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 });
 
     useEffect(() => {
+        if (!productId) {
+            // Xử lý lỗi hoặc quay lại
+            navigation.goBack();
+            return;
+        }
         loadAllReviews();
-    }, []);
+    }, [productId]);
 
     const loadAllReviews = async () => {
         try {
@@ -34,7 +40,7 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
                 setReviews(allReviews);
                 setFilteredReviews(allReviews);
 
-                // Calculate star counts
+                // Tính toán số lượng sao
                 const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
                 allReviews.forEach((review: any) => {
                     counts[review.rating as keyof typeof counts]++;
@@ -50,11 +56,11 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
 
     const filterByRating = (rating: number) => {
         if (selectedFilter === rating) {
-            // Deselect filter
+            // Bỏ chọn bộ lọc
             setSelectedFilter(null);
             setFilteredReviews(reviews);
         } else {
-            // Apply filter
+            // Áp dụng bộ lọc
             setSelectedFilter(rating);
             setFilteredReviews(reviews.filter((r: any) => r.rating === rating));
         }
@@ -80,7 +86,9 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
             <View style={styles.reviewHeader}>
                 <View style={styles.reviewerInfo}>
                     <View style={styles.reviewerAvatar}>
-                        {item.user?.avatar ? (
+                        {item.user?.avatar && (item.user.avatar.startsWith('http') || item.user.avatar.startsWith('data:')) ? (
+                            <Image source={{ uri: item.user.avatar }} style={styles.avatarImage} />
+                        ) : item.user?.avatar ? (
                             <Text style={styles.reviewerAvatarEmoji}>{item.user.avatar}</Text>
                         ) : (
                             <IconAnt name="user" size={20} color="#666" />
@@ -112,7 +120,7 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
                 <View style={{ width: 24 }} />
             </View>
 
-            {/* Product Info */}
+            {/* Thông tin sản phẩm */}
             <View style={styles.productInfo}>
                 <Text style={styles.productName} numberOfLines={2}>{productName}</Text>
                 <View style={styles.ratingRow}>
@@ -123,7 +131,7 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
                 </View>
             </View>
 
-            {/* Star Filters */}
+            {/* Bộ lọc sao */}
             <ScrollView
                 horizontal
                 showsHorizontalScrollIndicator={false}
@@ -160,7 +168,7 @@ const AllReviewsScreen = ({ navigation, route }: any) => {
                 ))}
             </ScrollView>
 
-            {/* Reviews List */}
+            {/* Danh sách đánh giá */}
             {loading ? (
                 <View style={styles.loadingContainer}>
                     <ActivityIndicator size="large" color="#4a90e2" />
@@ -313,6 +321,11 @@ const styles = StyleSheet.create({
     },
     reviewerAvatarEmoji: {
         fontSize: 24,
+    },
+    avatarImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
     },
     reviewerName: {
         fontSize: 14,
