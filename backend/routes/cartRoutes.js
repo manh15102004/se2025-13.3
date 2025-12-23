@@ -3,7 +3,7 @@ const router = express.Router();
 const { getCart, addToCart, updateCartItem, removeFromCart, clearCart } = require('../controllers/cartController');
 const { protect } = require('../middleware/auth');
 
-// All routes require authentication
+// Tất cả các route yêu cầu xác thực
 router.get('/', protect, getCart);
 router.post('/add', protect, addToCart);
 router.put('/:cartItemId', protect, updateCartItem);

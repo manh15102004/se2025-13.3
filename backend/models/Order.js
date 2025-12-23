@@ -25,7 +25,7 @@ const Order = sequelize.define(
         key: 'id'
       }
     },
-    totalPrice: {
+    totalAmount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },

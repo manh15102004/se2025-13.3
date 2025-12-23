@@ -1,10 +1,10 @@
 const { Conversation, Message, User } = require('../models');
 
-// Get or create conversation
+// Lấy hoặc tạo cuộc trò chuyện
 exports.getOrCreateConversation = async (req, res) => {
   try {
     const { userId: otherUserId } = req.body;
-    const currentUserId = req.userId;
+    const currentUserId = req.user?.id || req.userId;
 
     if (!otherUserId) {
       return res.status(400).json({
@@ -13,7 +13,7 @@ exports.getOrCreateConversation = async (req, res) => {
       });
     }
 
-    // Check if user exists
+    // Kiểm tra người dùng có tồn tại không
     const otherUser = await User.findByPk(otherUserId);
     if (!otherUser) {
       return res.status(404).json({
@@ -22,28 +22,43 @@ exports.getOrCreateConversation = async (req, res) => {
       });
     }
 
-    // Find existing conversation
-    let conversation = await Conversation.findOne({
-      include: {
+    // Kiểm tra cuộc trò chuyện đã tồn tại giữa những người dùng này
+    const userConversations = await Conversation.findAll({
+      include: [{
         model: User,
         as: 'participants',
         where: { id: currentUserId },
+        attributes: [],
         through: { attributes: [] },
-      },
+      }],
     });
 
+    let conversation = null;
+
+    // Duyệt và kiểm tra sự hiện diện của người dùng kia trong cuộc trò chuyện
+    // Giả định chủ yếu là chat 1-1. Để chính xác, kiểm tra xem số lượng người tham gia có phải là 2 và có chứa người dùng kia không.
+    for (const conv of userConversations) {
+      const count = await conv.countParticipants({
+        where: { id: otherUserId }
+      });
+      if (count > 0) {
+        conversation = conv;
+        break;
+      }
+    }
+
     if (!conversation) {
-      // Create new conversation
+      // Tạo cuộc trò chuyện mới
       conversation = await Conversation.create();
       await conversation.addParticipants([currentUserId, otherUserId]);
     }
 
-    // Reload with participants
+    // Trả về chi tiết đầy đủ cuộc trò chuyện
     conversation = await Conversation.findByPk(conversation.id, {
       include: {
         model: User,
         as: 'participants',
-        attributes: ['id', 'username', 'avatar', 'email'],
+        attributes: ['id', 'username', 'fullName', 'avatar', 'email', 'lastSeen'],
         through: { attributes: [] },
       },
     });
@@ -53,6 +68,7 @@ exports.getOrCreateConversation = async (req, res) => {
       conversation,
     });
   } catch (error) {
+    console.error('getOrCreateConversation Error:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -60,17 +76,42 @@ exports.getOrCreateConversation = async (req, res) => {
   }
 };
 
-// Get conversations
+// Lấy danh sách cuộc trò chuyện
+// Lấy danh sách cuộc trò chuyện
 exports.getConversations = async (req, res) => {
   try {
-    const currentUserId = req.userId;
+    const currentUserId = req.user?.id || req.userId;
 
-    const conversations = await Conversation.findAll({
-      include: {
+    // 1. Tìm tất cả ID cuộc trò chuyện mà người dùng tham gia
+    // Sử dụng truy vấn hoặc include có lọc để tìm ID trước
+    const userConversations = await Conversation.findAll({
+      include: [{
         model: User,
         as: 'participants',
         where: { id: currentUserId },
-        attributes: ['id', 'username', 'avatar', 'email'],
+        attributes: [],
+        through: { attributes: [] },
+      }],
+    });
+
+    const conversationIds = userConversations.map(c => c.id);
+
+    if (conversationIds.length === 0) {
+      return res.status(200).json({
+        success: true,
+        conversations: [],
+      });
+    }
+
+    // 2. Lấy chi tiết đầy đủ cho các ID này (bao gồm TẤT CẢ người tham gia)
+    const conversations = await Conversation.findAll({
+      where: {
+        id: conversationIds
+      },
+      include: {
+        model: User,
+        as: 'participants',
+        attributes: ['id', 'username', 'fullName', 'avatar', 'email', 'lastSeen'],
         through: { attributes: [] },
       },
       order: [['updatedAt', 'DESC']],
@@ -81,6 +122,7 @@ exports.getConversations = async (req, res) => {
       conversations,
     });
   } catch (error) {
+    console.error('getConversations Error:', error);
     res.status(500).json({
       success: false,
       message: error.message,
@@ -88,13 +130,13 @@ exports.getConversations = async (req, res) => {
   }
 };
 
-// Get messages from conversation
+// Lấy tin nhắn từ cuộc trò chuyện
 exports.getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const currentUserId = req.userId;
+    const currentUserId = req.user?.id || req.userId;
 
-    // Check if user is part of conversation
+    // Kiểm tra người dùng có trong cuộc trò chuyện không
     const conversation = await Conversation.findByPk(conversationId, {
       include: {
         model: User,
@@ -142,11 +184,11 @@ exports.getMessages = async (req, res) => {
   }
 };
 
-// Send message
+// Gửi tin nhắn
 exports.sendMessage = async (req, res) => {
   try {
     const { conversationId, content } = req.body;
-    const senderId = req.userId;
+    const senderId = req.user?.id || req.userId;
 
     if (!conversationId || !content) {
       return res.status(400).json({
@@ -155,7 +197,7 @@ exports.sendMessage = async (req, res) => {
       });
     }
 
-    // Check if user is part of conversation
+    // Kiểm tra người dùng có trong cuộc trò chuyện không
     const conversation = await Conversation.findByPk(conversationId, {
       include: {
         model: User,
@@ -181,26 +223,28 @@ exports.sendMessage = async (req, res) => {
       });
     }
 
-    // Find receiver
+    // Tìm người nhận
     const receiver = conversation.participants.find(
       (p) => p.id !== senderId
     );
 
-    // Create message
+    // Tạo tin nhắn
     const message = await Message.create({
       senderId,
       receiverId: receiver.id,
       conversationId,
       content,
+      type: req.body.type || 'text',
     });
 
-    // Update conversation last message
+    // Cập nhật tin nhắn cuối cùng của cuộc trò chuyện
+    const lastMsgContent = req.body.type === 'image' ? '[Hình ảnh]' : content;
     await conversation.update({
-      lastMessage: content,
+      lastMessage: lastMsgContent,
       lastMessageTime: new Date(),
     });
 
-    // Reload message with sender
+    // Tải lại tin nhắn kèm thông tin người gửi
     const fullMessage = await Message.findByPk(message.id, {
       include: {
         model: User,
@@ -221,13 +265,13 @@ exports.sendMessage = async (req, res) => {
   }
 };
 
-// Mark messages as read
+// Đánh dấu tin nhắn đã đọc
 exports.markAsRead = async (req, res) => {
   try {
     const { conversationId } = req.body;
-    const currentUserId = req.userId;
+    const currentUserId = req.user?.id || req.userId;
 
-    // Check if user is part of conversation
+    // Kiểm tra người dùng có trong cuộc trò chuyện không
     const conversation = await Conversation.findByPk(conversationId, {
       include: {
         model: User,
@@ -253,7 +297,7 @@ exports.markAsRead = async (req, res) => {
       });
     }
 
-    // Mark all messages as read
+    // Đánh dấu tất cả tin nhắn là đã đọc
     await Message.update(
       { isRead: true },
       {

@@ -8,10 +8,10 @@ const {
 } = require('../controllers/reviewController');
 const { protect } = require('../middleware/auth');
 
-// Public routes
+// Các route công khai
 router.get('/product/:productId', getProductReviews);
 
-// Protected routes
+// Các route được bảo vệ
 router.post('/create', protect, createReview);
 router.put('/:id', protect, updateReview);
 router.delete('/:id', protect, deleteReview);

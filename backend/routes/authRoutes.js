@@ -1,14 +1,17 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getCurrentUser, updateProfile } = require('../controllers/authController');
+const { register, login, getCurrentUser, updateProfile, getProfile, changePassword, facebookLogin } = require('../controllers/authController');
 const { protect } = require('../middleware/auth');
 
-// Public routes
+// Các route công khai
 router.post('/register', register);
 router.post('/login', login);
+router.post('/facebook', facebookLogin); // Đăng nhập OAuth Facebook
 
-// Protected routes
+// Các route được bảo vệ
 router.get('/me', protect, getCurrentUser);
+router.get('/profile', protect, getProfile);
 router.put('/profile', protect, updateProfile);
+router.put('/change-password', protect, changePassword);
 
 module.exports = router;

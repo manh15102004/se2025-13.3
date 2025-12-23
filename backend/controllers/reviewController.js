@@ -1,13 +1,13 @@
 const { Review, User, Product } = require('../models');
 const { Op } = require('sequelize');
 
-// Create a review
+// Tạo đánh giá
 exports.createReview = async (req, res) => {
     try {
         const { productId, rating, comment } = req.body;
         const userId = req.user.id;
 
-        // Check if user already reviewed this product
+        // Kiểm tra xem người dùng đã đánh giá sản phẩm này chưa
         const existingReview = await Review.findOne({
             where: { productId, userId },
         });
@@ -19,7 +19,7 @@ exports.createReview = async (req, res) => {
             });
         }
 
-        // Create review
+        // Tạo đánh giá mới
         const review = await Review.create({
             productId,
             userId,
@@ -27,10 +27,10 @@ exports.createReview = async (req, res) => {
             comment,
         });
 
-        // Update product average rating
+        // Cập nhật điểm đánh giá trung bình của sản phẩm
         await updateProductRating(productId);
 
-        // Get review with user info
+        // Lấy đánh giá kèm thông tin người dùng
         const reviewWithUser = await Review.findByPk(review.id, {
             include: [
                 {
@@ -55,7 +55,7 @@ exports.createReview = async (req, res) => {
     }
 };
 
-// Get all reviews for a product
+// Lấy tất cả đánh giá của một sản phẩm
 exports.getProductReviews = async (req, res) => {
     try {
         const { productId } = req.params;
@@ -77,7 +77,7 @@ exports.getProductReviews = async (req, res) => {
             offset: parseInt(offset),
         });
 
-        // Calculate average rating
+        // Tính điểm đánh giá trung bình
         const avgRating = await Review.findOne({
             where: { productId },
             attributes: [
@@ -105,7 +105,7 @@ exports.getProductReviews = async (req, res) => {
     }
 };
 
-// Update own review
+// Cập nhật đánh giá của chính mình
 exports.updateReview = async (req, res) => {
     try {
         const { id } = req.params;
@@ -132,7 +132,7 @@ exports.updateReview = async (req, res) => {
         review.comment = comment;
         await review.save();
 
-        // Update product average rating
+        // Cập nhật điểm đánh giá trung bình của sản phẩm
         await updateProductRating(review.productId);
 
         const reviewWithUser = await Review.findByPk(id, {
@@ -159,7 +159,7 @@ exports.updateReview = async (req, res) => {
     }
 };
 
-// Delete own review
+// Xóa đánh giá của chính mình
 exports.deleteReview = async (req, res) => {
     try {
         const { id } = req.params;
@@ -184,7 +184,7 @@ exports.deleteReview = async (req, res) => {
         const productId = review.productId;
         await review.destroy();
 
-        // Update product average rating
+        // Cập nhật điểm đánh giá trung bình của sản phẩm
         await updateProductRating(productId);
 
         res.status(200).json({
@@ -200,7 +200,7 @@ exports.deleteReview = async (req, res) => {
     }
 };
 
-// Helper function to update product rating
+// Hàm hỗ trợ cập nhật đánh giá sản phẩm
 async function updateProductRating(productId) {
     try {
         const avgRating = await Review.findOne({

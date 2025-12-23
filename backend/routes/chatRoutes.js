@@ -9,7 +9,7 @@ const {
 } = require('../controllers/chatController');
 const { protect } = require('../middleware/auth');
 
-// All routes are protected
+// Tất cả các route đều được bảo vệ
 router.use(protect);
 
 router.post('/conversation', getOrCreateConversation);

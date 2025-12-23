@@ -1,10 +1,10 @@
 const { Cart, User } = require('../models');
 
-// Get cart for current user
+// Lấy giỏ hàng của người dùng hiện tại
 exports.getCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    
+
     const cartItems = await Cart.findAll({
       where: { userId },
     });
@@ -22,11 +22,11 @@ exports.getCart = async (req, res) => {
   }
 };
 
-// Add item to cart
+// Thêm sản phẩm vào giỏ hàng
 exports.addToCart = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { productId, quantity, price } = req.body;
+    const { productId, quantity, price, size } = req.body;
 
     if (!productId || !quantity || !price) {
       return res.status(400).json({
@@ -35,16 +35,21 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Check if item already in cart
-    const existingItem = await Cart.findOne({
-      where: { userId, productId },
-    });
+    // Kiểm tra xem sản phẩm đã có trong giỏ hàng chưa (cùng sản phẩm VÀ cùng kích thước)
+    const whereClause = { userId, productId };
+    if (size) {
+      whereClause.size = size;
+    } else {
+      whereClause.size = null;
+    }
+
+    const existingItem = await Cart.findOne({ where: whereClause });
 
     if (existingItem) {
-      // Update quantity
+      // Cập nhật số lượng
       existingItem.quantity += quantity;
       await existingItem.save();
-      
+
       return res.status(200).json({
         success: true,
         message: 'Item quantity updated',
@@ -52,12 +57,13 @@ exports.addToCart = async (req, res) => {
       });
     }
 
-    // Create new cart item
+    // Tạo mục giỏ hàng mới
     const cartItem = await Cart.create({
       userId,
       productId,
       quantity,
       price,
+      size: size || null,
     });
 
     res.status(201).json({
@@ -73,7 +79,7 @@ exports.addToCart = async (req, res) => {
   }
 };
 
-// Update cart item quantity
+// Cập nhật số lượng sản phẩm trong giỏ
 exports.updateCartItem = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -114,7 +120,7 @@ exports.updateCartItem = async (req, res) => {
   }
 };
 
-// Remove item from cart
+// Xóa sản phẩm khỏi giỏ hàng
 exports.removeFromCart = async (req, res) => {
   try {
     const userId = req.user.id;
@@ -145,7 +151,7 @@ exports.removeFromCart = async (req, res) => {
   }
 };
 
-// Clear cart
+// Xóa toàn bộ giỏ hàng
 exports.clearCart = async (req, res) => {
   try {
     const userId = req.user.id;

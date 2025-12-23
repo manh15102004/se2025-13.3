@@ -15,7 +15,7 @@ const Notification = sequelize.define(
     },
     orderId: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     type: {
       type: DataTypes.ENUM('order_approved', 'order_shipped', 'order_delivered', 'order_cancelled'),

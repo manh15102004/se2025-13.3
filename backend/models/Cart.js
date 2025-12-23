@@ -29,15 +29,14 @@ const Cart = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
     },
+    size: {
+      type: DataTypes.STRING(10),
+      allowNull: true, // Tùy chọn cho các mặt hàng không phải thời trang
+    },
   },
   {
     timestamps: true,
-    indexes: [
-      {
-        unique: true,
-        fields: ['userId', 'productId'],
-      },
-    ],
+    // Đã xóa ràng buộc duy nhất để cho phép cùng một sản phẩm với các kích thước khác nhau
   }
 );
 

@@ -13,7 +13,6 @@ const User = sequelize.define(
     username: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      unique: true,
       defaultValue: null,
     },
     email: {
@@ -40,7 +39,7 @@ const User = sequelize.define(
       allowNull: true,
     },
     avatar: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.TEXT({ length: 'long' }),
       defaultValue: 'https://via.placeholder.com/150?text=User',
     },
     address: {
@@ -51,6 +50,22 @@ const User = sequelize.define(
       type: DataTypes.ENUM('buyer', 'seller', 'shipper', 'admin'),
       defaultValue: 'buyer',
       allowNull: false,
+    },
+    shippingFeePerOrder: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 20000,
+      comment: 'Phí giao hàng mà shipper nhận được cho mỗi đơn hàng hoàn thành',
+    },
+    facebookId: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+      comment: 'ID người dùng Facebook để đăng nhập OAuth',
+    },
+    lastSeen: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: DataTypes.NOW,
+      comment: 'Lần cuối người dùng hoạt động, dùng cho trạng thái online/offline',
     },
   },
   {
@@ -73,6 +88,11 @@ const User = sequelize.define(
 );
 
 User.prototype.matchPassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Alias để tương thích
+User.prototype.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
 
