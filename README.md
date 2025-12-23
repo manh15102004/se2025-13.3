@@ -1,426 +1,253 @@
-# 🛍️ AppSale - E-Commerce Mobile Application
+#  Ứng dụng mua sắm thông minh
 
-> Ứng dụng thương mại điện tử được xây dựng bằng React Native và Node.js
+Tình hình mua sắm trực tuyến 2025 ở Việt Nam đang bùng nổ, thu hút hàng triệu người dùng mỗi ngày. Giờ đây, chỉ cần một chiếc điện thoại thông minh và vài cú chạm, mọi thứ đều có thể được giao đến tận tay khách hàng.
 
-## 📋 Mục Lục
-
-- [Giới Thiệu](#-giới-thiệu)
-- [Công Nghệ Sử Dụng](#-công-nghệ-sử-dụng)
-- [Yêu Cầu Hệ Thống](#-yêu-cầu-hệ-thống)
-- [Hướng Dẫn Cài Đặt](#-hướng-dẫn-cài-đặt)
-- [Chạy Ứng Dụng](#-chạy-ứng-dụng)
-- [Quy Trình Làm Việc Nhóm](#-quy-trình-làm-việc-nhóm)
-- [Cấu Trúc Dự Án](#-cấu-trúc-dự-án)
-- [Git Workflow](#-git-workflow)
+Xuất phát từ thực tế đó, **ứng dụng mua sắm thông minh** được xây dựng nhằm mang lại trải nghiệm mua sắm tối ưu, nhanh chóng và tiện lợi nhất cho người Việt.
 
 ---
 
-## 🎯 Giới Thiệu
+##  Thành Viên Nhóm Thực Hiện
 
-AppSale là ứng dụng thương mại điện tử di động cho phép người dùng:
-- 🛒 Mua sắm sản phẩm đa dạng
-- 💰 Bán sản phẩm của riêng mình
-- 📦 Quản lý đơn hàng
-- ⭐ Đánh giá và review sản phẩm
-- 👤 Quản lý hồ sơ cá nhân
-
-## 🛠️ Công Nghệ Sử Dụng
-
-### Frontend (Mobile App)
-- **React Native** - Framework phát triển mobile app
-- **TypeScript** - Type-safe JavaScript
-- **React Navigation** - Điều hướng trong app
-- **Zustand** - State management
-
-### Backend (API Server)
-- **Node.js** - Runtime environment
-- **Express.js** - Web framework
-- **MySQL** - Database
-- **Sequelize** - ORM
-- **JWT** - Authentication
-
-## 💻 Yêu Cầu Hệ Thống
-
-Trước khi bắt đầu, đảm bảo máy tính của bạn đã cài đặt:
-
-- **Node.js** >= 16.x ([Tải tại đây](https://nodejs.org/))
-- **npm** >= 8.x (đi kèm với Node.js)
-- **Git** ([Tải tại đây](https://git-scm.com/))
-- **MySQL** >= 8.0 ([Tải tại đây](https://dev.mysql.com/downloads/))
-- **React Native CLI** hoặc **Expo CLI**
-- **Android Studio** (cho Android) hoặc **Xcode** (cho iOS)
-
-### Kiểm Tra Phiên Bản
-```bash
-node --version    # Phải >= 16.x
-npm --version     # Phải >= 8.x
-git --version     # Bất kỳ phiên bản nào
-mysql --version   # Phải >= 8.0
-```
+| STT | Họ và Tên | 
+| :--: | :--- | 
+| 1 | **Phạm Đức Mạnh** | 
+| 2 | **Nghiêm Việt Quân** | 
+| 3 | **Lương Văn Khoa** | 
+| 4 | **Phạm Văn Vinh** | 
 
 ---
 
-## 📥 Hướng Dẫn Cài Đặt
+##  Mục Lục
 
-### Bước 1: Clone Repository
-
-```bash
-# Clone dự án từ GitHub
-git clone https://github.com/manh15102004/se2025-13.3.git
-
-# Di chuyển vào thư mục dự án
-cd se2025-13.3
-```
-
-### Bước 2: Cài Đặt Dependencies
-
-#### 2.1. Cài đặt Frontend Dependencies
-```bash
-# Cài đặt các package cho React Native app
-npm install
-```
-
-#### 2.2. Cài đặt Backend Dependencies
-```bash
-# Di chuyển vào thư mục backend
-cd backend
-
-# Cài đặt các package cho backend
-npm install
-
-# Quay lại thư mục gốc
-cd ..
-```
-
-### Bước 3: Cấu Hình Database
-
-#### 3.1. Tạo Database MySQL
-```sql
--- Mở MySQL và chạy lệnh sau:
-CREATE DATABASE appsale_db;
-```
-
-#### 3.2. Cấu Hình Kết Nối Database
-Tạo file `.env` trong thư mục `backend/`:
-
-```bash
-# backend/.env
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=your_mysql_password
-DB_NAME=appsale_db
-DB_PORT=3306
-
-JWT_SECRET=your_secret_key_here
-PORT=3000
-```
-
-⚠️ **Lưu ý:** Thay `your_mysql_password` bằng mật khẩu MySQL của bạn.
-
-#### 3.3. Chạy Migration và Seed Data
-```bash
-cd backend
-node setup-database.js
-cd ..
-```
-
-### Bước 4: Cấu Hình API URL (React Native)
-
-Cập nhật API URL trong file `src/api/client.ts`:
-
-```typescript
-// Nếu chạy trên Android Emulator
-const API_BASE_URL = 'http://10.0.2.2:3000/api';
-
-// Nếu chạy trên thiết bị thật, thay bằng IP máy tính
-// const API_BASE_URL = 'http://192.168.1.x:3000/api';
-```
+1. [Tổng Quan Công Nghệ](#-tổng-quan-công-nghệ)
+2. [Chức Năng](#-chi-tiết-chức-năng)
+    - [2.1. Hệ Thống Xác Thực & Người Dùng](#21-hệ-thống-xác-thực--người-dùng)
+    - [2.2. Trải Nghiệm Mua Sắm Thông Minh](#22-trải-nghiệm-mua-sắm-thông-minh)
+    - [2.3. Quy Trình Đặt Hàng & Thanh Toán](#23-quy-trình-đặt-hàng--thanh-toán)
+    - [2.4. Hệ Thống Quản Lý Bán Hàng (Seller)](#24-hệ-thống-quản-lý-bán-hàng-seller)
+    - [2.5. Phân Hệ Vận Chuyển & Quản Trị](#25-phân-hệ-vận-chuyển--quản-trị)
+    - [2.6. Tương Tác & Tiện Ích Mở Rộng](#26-tương-tác--tiện-ích-mở-rộng)
+3. [Cài Đặt & Vận Hành](#-cài-đặt--vận-hành)
 
 ---
 
-## 🚀 Chạy Ứng Dụng
+## Tổng Quan Công Nghệ
 
-### Chạy Backend Server
-
-```bash
-# Mở terminal 1 - Chạy backend
-cd backend
-npm run dev
-
-# Server sẽ chạy tại: http://localhost:3000
-```
-
-### Chạy React Native App
-
-```bash
-# Mở terminal 2 - Chạy React Native
-npm start
-
-# Sau đó chọn:
-# - Nhấn 'a' để chạy trên Android
-# - Nhấn 'i' để chạy trên iOS (chỉ trên macOS)
-```
-
-### Hoặc Chạy Trực Tiếp
-
-```bash
-# Android
-npm run android
-
-# iOS (chỉ trên macOS)
-npm run ios
-```
+| Thành Phần | Công Nghệ | Mô Tả & Vai Trò |
+| :--- | :--- | :--- |
+| **Frontend** | **React Native** | Xây dựng giao diện native mượt mà cho cả Android và iOS từ một codebase duy nhất. |
+| | **Typescript** | Tăng cường độ tin cậy của code, giúp phát hiện lỗi ngay trong quá trình phát triển (Compile-time). |
+| | **Zustand** | Quản lý trạng thái ứng dụng (Global State) siêu nhẹ, dùng để lưu Giỏ hàng, Thông tin User đăng nhập mà không làm chậm app. |
+| | **React Navigation v7** | Phiên bản mới nhất, xử lý điều hướng Stack (ngăn xếp) và TabBar mượt mà, hỗ trợ deep linking. |
+| | **Axios** | Thư viện HTTP Client mạnh mẽ, được bọc (Wrapper) để tự động xử lý Token và lỗi mạng tập trung. |
+| **Backend** | **Node.js + Express** | Server hiệu năng cao, xử lý hàng nghìn request đồng thời nhờ cơ chế Non-blocking I/O. |
+| | **MySQL + Sequelize** | Cấu trúc dữ liệu quan hệ chặt chẽ. Sequelize ORM giúp thao tác database an toàn, tránh SQL Injection. |
+| | **Socket.io** | Công nghệ cốt lõi cho tính năng Chat Real-time và Thông báo đẩy tức thời (Real-time Notifications). |
 
 ---
 
-## 👥 Quy Trình Làm Việc Nhóm
+##  Chức Năng
 
-### Cấu Trúc Nhánh
+### 2.1. Hệ Thống Xác Thực & Người Dùng
 
-```
-main (production - code ổn định)
-  └── develop (development - code đang phát triển)
-        ├── feature/user-authentication
-        ├── feature/product-management
-        ├── feature/order-processing
-        └── bugfix/price-display
-```
+Hệ thống quản lý định danh người dùng an toàn, hỗ trợ phân quyền đa vai trò (Buyer, Seller, Shipper, Admin).
 
-### Quy Tắc Làm Việc
+<p float="left">
+  <img src="img/dang_nhap.jpg" width="220" />
+  <img src="img/dang_ky.jpg" width="220" />
+  <img src="img/ho_so.jpg" width="220" />
+  <img src="img/chinh_sua_ho_so.jpg" width="220" />
+</p>
 
-> ⚠️ **QUAN TRỌNG:**
-> - ❌ **KHÔNG BAO GIỜ** push trực tiếp lên nhánh `main`
-> - ❌ **KHÔNG BAO GIỜ** force push lên nhánh `develop` hoặc `main`
-> - ✅ **LUÔN LUÔN** tạo nhánh feature mới từ `develop`
-> - ✅ **LUÔN LUÔN** tạo Pull Request để merge code
+*   **Quy trình Đăng nhập/Đăng ký**:
+    *   Kiểm tra tính hợp lệ của Email và độ mạnh của Mật khẩu ngay khi nhập.
+    *   Mật khẩu được mã hóa một chiều (Hashing) bằng **Bcrypt** trước khi lưu vào Database(MySQL).
+    
+*   **Quản Lý Hồ Sơ Cá Nhân**:
+    *   Hiển thị trực quan thông tin: Avatar, Tên, Số điện thoại
+    *   **Dashboard tích hợp**: Từ màn hình hồ sơ, người dùng có thể truy cập nhanh vào: Lịch sử mua hàng, Quản lý shop bán hàng, hoặc Sổ địa chỉ.
+    *   **Cập nhật thông tin**: Cho phép thay đổi ảnh đại diện (Upload lên server), chỉnh sửa thông tin cá nhân và đổi mật khẩu bảo mật.
+
+### 2.2. Trải Nghiệm Mua Sắm Thông Minh
+
+Tối ưu hóa trải nghiệm tìm kiếm và lựa chọn sản phẩm của người dùng.
+
+<p float="left">
+  <img src="img/home.jpg" width="220" />
+  <img src="img/san_pham.jpg" width="220" />
+  <img src="img/chi_tiet_san_pham.jpg" width="220" />
+  <img src="img/bo_loc_san_pham.jpg" width="220" />
+</p>
+
+*   **Trang Chủ (Home)**:
+    *   Banner quảng cáo dạng Carousel trượt tự động, giúp làm nổi bật các chương trình khuyến mãi.
+    *   Danh mục sản phẩm (Category) được chia theo icon giúp người dùng lọc nhanh (Điện tử, Thời trang, Gia dụng...).
+    *   Phần "Gợi ý cho bạn" sử dụng thuật toán cơ bản để hiển thị các sản phẩm được đánh giá cao.
+*   **Chi Tiết Sản Phẩm (Product Detail)**:
+    *   Hiển thị đầy đủ hình ảnh (có thể zoom), giá bán, số lượng đã bán và mô tả chi tiết.
+    *   **Thông tin Shop**: Người mua có thể xem Shop này là ai, đánh giá uy tín bao nhiêu sao trước khi mua.
+    *   **Đánh giá thực tế**: Danh sách các review từ người mua trước đó.
+*   **Công Cụ Tìm Kiếm & Lọc**:
+    *   Thanh tìm kiếm (Search Bar) phản hồi tức thì.
+    *   Bộ lọc nâng cao (Filter): Lọc theo khoảng giá (min-max), sắp xếp theo giá tăng/giảm, hoặc lọc theo đánh giá sao.
+
+### 2.3. Quy Trình Đặt Hàng & Thanh Toán
+
+Flow mua hàng được thiết kế tối giản để tăng tỷ lệ chuyển đổi (Conversion Rate).
+
+<p float="left">
+  <img src="img/gio_hang.jpg" width="220" />
+  <img src="img/thanh_toan.jpg" width="220" />
+  <img src="img/giao_dich.jpg" width="220" />
+</p>
+
+*   **Giỏ Hàng Thông Minh (Cart)**:
+    *   Tự động gộp nhóm các sản phẩm cùng Shop để tính phí vận chuyển hợp lý.
+    *   Cho phép tăng/giảm số lượng hoặc xóa sản phẩm.
+    *   Hiển thị tổng tiền tạm tính theo thời gian thực (Real-time calculation).
+*   **Thanh Toán (Checkout)**:
+    *   Hỗ trợ đa phương thức: **Thanh toán khi nhận hàng (COD)** và **Ví điện tử (Mô phỏng MoMo Wallet)**.
+    *   Xác nhận địa chỉ giao hàng: Người dùng có thể chọn từ sổ địa chỉ đã lưu.
+*   **Quản Lý Đơn Hàng**:
+    *   Trạng thái đơn hàng cập nhật liên tục: *Chờ xác nhận -> Đang đóng gói -> Đang giao (Shipper đã nhận) -> Giao thành công*.
+    *   Lịch sử giao dịch chi tiết hỗ trợ đối soát khi cần thiết.
+
+### 2.4. Hệ Thống Quản Lý Bán Hàng (Seller)
+
+Chuyển đổi vai trò linh hoạt: Người mua cũng có thể trở thành Người bán chỉ với 1 nút bấm.
+
+<p float="left">
+  <img src="img/shop_ca_nhan.jpg" width="220" />
+  <img src="img/dang_ban_san_pham.jpg" width="220" />
+  <img src="img/doanh_thu.jpg" width="220" />
+  <img src="img/dich_vu_quang_cao.jpg" width="220" />
+</p>
+
+*   **Dashboard Người Bán**:
+    *   Tổng quan tình hình kinh doanh: Số đơn mới, Doanh thu trong ngày/tháng.
+*   **Quản Lý Kho Hàng**:
+    *   Đăng bán sản phẩm mới: Hỗ trợ upload nhiều ảnh, chọn danh mục, nhập số lượng kho.
+    *   Chỉnh sửa/Ẩn sản phẩm khi hết hàng.
+*   **Thống Kê Doanh Thu**:
+    *   Biểu đồ trực quan (Chart Kit) hiển thị biến động doanh thu theo thời gian, giúp người bán ra quyết định nhập hàng.
+*   **Dịch Vụ Quảng Cáo**:
+    *   Người bán có thể mua các gói Banner để sản phẩm của mình xuất hiện trên trang chủ, tăng lượt tiếp cận.
+
+### 2.5. Phân Hệ Vận Chuyển & Quản Trị
+
+Giải quyết bài toán Logistics và Quản trị hệ thống.
+
+<p float="left">
+  <img src="img/role_shipper.jpg" width="220" />
+  <img src="img/role_admin.jpg" width="220" />
+</p>
+
+*   **Dành Cho Tài Xế (Shipper)**:
+    *   **Sàn đơn hàng**: Xem danh sách các đơn hàng đang "Chờ giao" trong khu vực.
+    *   **Quy trình giao nhận**: Nhận đơn -> Gọi điện cho khách (tích hợp nút gọi) -> Xác nhận giao thành công -> Nhận tiền COD.
+*   **Dành Cho Admin**:
+    *   Quyền lực cao nhất hệ thống: Xem toàn bộ danh sách User, Sản phẩm, Đơn hàng.
+    *   Phê duyệt các chiến dịch quảng cáo, Banner của người bán.
+
+### 2.6. Tương Tác & Tiện Ích Mở Rộng
+
+Tạo dựng niềm tin và sự gắn kết giữa các người dùng.
+
+<p float="left">
+  <img src="img/chat.jpg" width="220" />
+  <img src="img/chat_realtime.jpg" width="220" />
+  <img src="img/thong_bao.jpg" width="220" />
+  <img src="img/danh_gia_san_pham.jpg" width="220" />
+  <img src="img/yeu_thich.jpg" width="220" />
+</p>
+
+*   **Chat Thời Gian Thực (Socket.io)**:
+    *   Người mua có thể chat trực tiếp với Người bán để hỏi về kỹ thuật/bảo hành sản phẩm.
+    *   Tin nhắn được gửi/nhận tức thì không độ trễ.
+    *   Lưu trữ lịch sử chat để xem lại sau này.
+*   **Hệ Thống Thông Báo**:
+    *   Nhận thông báo ngay lập tức khi: Đơn hàng thay đổi trạng thái, Có tin nhắn mới, hoặc Có khuyến mãi.
+*   **Hệ Thống Đánh Giá (Review)**:
+    *   Cho phép chấm điểm sao (1-5 sao) và viết bình luận, nhưng chỉ khả dụng với những người **đã thực sự mua hàng**, tránh spam/đánh giá ảo.
 
 ---
 
-## 🔄 Git Workflow - Hướng Dẫn Chi Tiết
+##  Cài Đặt & Vận Hành
 
-### 1️⃣ Lần Đầu Tiên Clone Dự Án
+Để chạy dự án này trên máy local của bản thân, hãy làm theo các bước sau:
 
+### Bước 1: Chuẩn Bị Môi Trường
+Đảm bảo máy tính đã cài đặt:
+- **Node.js** (v16 trở lên)
+- **MySQL** (Database Server)
+- **Git**
+
+##  Cài Đặt & Vận Hành 
+
+### Bước 1: Clone Dự Án
+Mở Terminal/Command Prompt và chạy lệnh:
 ```bash
-# Clone repository
 git clone https://github.com/manh15102004/se2025-13.3.git
 cd se2025-13.3
-
-# Xem tất cả các nhánh
-git branch -a
-
-# Checkout nhánh develop
-git checkout develop
-
-# Cài đặt dependencies
-npm install
-cd backend && npm install && cd ..
 ```
 
-### 2️⃣ Bắt Đầu Làm Tính Năng Mới
+### Bước 2: Cài Đặt Backend (API Server)
 
-```bash
-# 1. Đảm bảo đang ở nhánh develop
-git checkout develop
+1.  **Di chuyển vào thư mục backend**:
+    ```bash
+    cd backend
+    npm install
+    ```
 
-# 2. Cập nhật code mới nhất từ GitHub
-git pull origin develop
+2.  **Cấu hình Database**:
+    *   Tạo file `.env` tại thư mục `backend/` với nội dung mẫu:
+    ```properties
+    PORT=5000
+    DB_HOST=localhost
+    DB_USER=root
+    DB_PASSWORD=YOUR_MYSQL_PASSWORD  # <-- Nhập mật khẩu MySQL của bạn
+    DB_NAME=appsale
+    JWT_SECRET=secret_key_123
+    ```
 
-# 3. Tạo nhánh feature mới
-git checkout -b feature/ten-tinh-nang
+3.  **Khởi tạo Database**:
+    ```bash
+    # Chạy script để tạo bảng và seed dữ liệu mẫu
+    node setup-database.js
+    ```
 
-# Ví dụ:
-git checkout -b feature/user-profile
-git checkout -b feature/payment-gateway
-git checkout -b bugfix/cart-total-calculation
-```
+4.  **Chạy Server**:
+    ```bash
+    npm run dev
+    # Server sẽ chạy tại: http://localhost:5000
+    ```
 
-### 3️⃣ Làm Việc và Commit Code
+### Bước 3: Cài Đặt Frontend (Mobile App)
 
-```bash
-# 1. Kiểm tra các file đã thay đổi
-git status
+ **Lưu ý quan trọng**: Để App trên điện thoại/Emulator kết nối được với Server, bạn cần cấu hình đúng địa chỉ IP.
 
-# 2. Thêm file vào staging
-git add .
-# Hoặc thêm từng file cụ thể:
-git add src/screens/ProfileScreen.tsx
+1.  **Cập nhật địa chỉ IP API**:
+    *   Mở file `src/api/client.ts`.
+    *   Tìm dòng `export const API_BASE_URL`.
+    *   Thay đổi IP phù hợp:
+        *   Nếu dùng Android Emulator: Giữ nguyên `http://10.0.2.2:5000/api`.
+        *   Nếu dùng Điện thoại thật: Mở CMD gõ `ipconfig` để lấy IPv4 của máy tính (ví dụ `192.168.1.10`) và thay vào: `http://192.168.1.10:5000/api`.
 
-# 3. Commit với message rõ ràng
-git commit -m "feat(profile): Add user avatar upload feature"
-
-# 4. Push lên GitHub
-git push -u origin feature/user-profile
-```
-
-### 4️⃣ Tạo Pull Request (PR)
-
-1. Truy cập: https://github.com/manh15102004/se2025-13.3
-2. Click nút **"Compare & pull request"**
-3. Điền thông tin:
-   - **Base:** `develop`
-   - **Compare:** `feature/user-profile`
-   - **Title:** Tên tính năng (ví dụ: "Add user avatar upload feature")
-   - **Description:** Mô tả chi tiết những gì đã làm
-4. Click **"Create pull request"**
-5. Chờ team review và approve
-
-### 5️⃣ Sau Khi PR Được Merge
-
-```bash
-# 1. Chuyển về nhánh develop
-git checkout develop
-
-# 2. Cập nhật code mới nhất
-git pull origin develop
-
-# 3. Xóa nhánh feature đã merge (optional)
-git branch -d feature/user-profile
-```
-
-### 6️⃣ Cập Nhật Code Khi Có Thay Đổi Từ Team
-
-```bash
-# Khi đang làm việc trên nhánh feature
-git checkout develop
-git pull origin develop
-
-git checkout feature/your-feature
-git merge develop
-
-# Nếu có conflict, giải quyết conflict rồi:
-git add .
-git commit -m "merge: Resolve conflicts with develop"
-git push
-```
+2.  **Chạy Ứng Dụng**:
+    ```bash
+    # Mở một terminal mới tại thư mục gốc dự án
+    npm install
+    npm start
+    ```
+    *   Nhấn phím **`a`** để chạy trên Android.
 
 ---
 
-## 📁 Cấu Trúc Dự Án
+## Khắc Phục Lỗi (Troubleshooting)
 
-```
-se2025-13.3/
-├── src/                          # Frontend source code
-│   ├── api/                      # API client
-│   ├── screens/                  # Màn hình ứng dụng
-│   │   └── compoments/          # Components của từng màn hình
-│   ├── store/                    # Zustand stores
-│   ├── data/                     # Static data
-│   ├── constants/                # Constants
-│   └── types/                    # TypeScript types
-│
-├── backend/                      # Backend source code
-│   ├── config/                   # Configuration files
-│   ├── controllers/              # Route controllers
-│   ├── models/                   # Database models
-│   ├── routes/                   # API routes
-│   ├── middleware/               # Express middleware
-│   └── server.js                 # Entry point
-│
-├── android/                      # Android native code
-├── ios/                          # iOS native code
-├── node_modules/                 # Dependencies
-├── package.json                  # Frontend dependencies
-├── README.md                     # This file
-└── .gitignore                    # Git ignore rules
-```
+*   **Lỗi: Network Error / API Request Failed**: 90% là do sai IP trong `client.ts` hoặc điện thoại và máy tính không chung Wifi.
+*   **Lỗi: Database connection failed**: Kiểm tra lại mật khẩu MySQL trong file `.env`.
+*   **Lỗi: Task :app:installDebug FAILED**: Thử chạy lệnh `cd android && gradlew clean` rồi chạy lại `npm start`.
 
 ---
-
-## 📝 Commit Message Convention
-
-Sử dụng format: `<type>(<scope>): <subject>`
-
-### Types:
-- `feat`: Tính năng mới
-- `fix`: Sửa bug
-- `docs`: Cập nhật documentation
-- `style`: Format code (không ảnh hưởng logic)
-- `refactor`: Refactor code
-- `test`: Thêm/sửa tests
-- `chore`: Cập nhật build, dependencies
-
-### Ví Dụ:
-```bash
-feat(auth): Add Google login integration
-fix(cart): Fix total price calculation error
-docs(readme): Update installation guide
-refactor(api): Simplify error handling
-chore(deps): Update React Native to 0.72
-```
-
----
-
-## 🐛 Xử Lý Lỗi Thường Gặp
-
-### Lỗi: "Cannot connect to backend"
-```bash
-# Kiểm tra backend đang chạy
-cd backend
-npm run dev
-
-# Kiểm tra API URL trong src/api/client.ts
-```
-
-### Lỗi: "Database connection failed"
-```bash
-# Kiểm tra MySQL đang chạy
-# Kiểm tra file backend/.env có đúng thông tin không
-```
-
-### Lỗi: "Module not found"
-```bash
-# Cài lại dependencies
-rm -rf node_modules
-npm install
-
-cd backend
-rm -rf node_modules
-npm install
-```
-
-### Lỗi Git Conflict
-```bash
-# Khi gặp conflict
-git status                    # Xem file bị conflict
-# Mở file và sửa conflict thủ công
-git add .
-git commit -m "merge: Resolve conflicts"
-git push
-```
-
----
-
-## 🤝 Đóng Góp
-
-1. Fork repository
-2. Tạo nhánh feature (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Tạo Pull Request
-
----
-
-## 📞 Liên Hệ
-
-- **Repository:** https://github.com/manh15102004/se2025-13.3
-- **Issues:** https://github.com/manh15102004/se2025-13.3/issues
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License.
-
----
-
-## 🎓 Team Members
-
-Thêm tên các thành viên trong team tại đây:
-
-- Member 1 - Role
-- Member 2 - Role
-- Member 3 - Role
-
----
-
-**Happy Coding! 🚀**
+*Báo cáo dự án AppSale - Updated 23/12/2025*
